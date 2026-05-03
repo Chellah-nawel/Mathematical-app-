@@ -115,17 +115,7 @@ btn_axe1  = make_nav_btn("⊘", "Axe 1", sub_text="Fonctions non linéaires")
 btn_axe2  = make_nav_btn("▦", "Axe 2", sub_text="Systèmes linéaires")
 btn_axe3  = make_nav_btn("📈", "Axe 3", sub_text="Interpolation &\nApproximation")
 
-# ── Second group of nav items ─────────────────────────────────────────────────
-# sep2 = customtkinter.CTkFrame(master=left_frame, height=1, fg_color="#1e3050")
-# sep2.pack(fill="x", padx=10, pady=(8, 8))
-
-# btn_comp  = make_nav_btn(left_frame, "⇌",  "Comparaison")
-# btn_hist  = make_nav_btn(left_frame, "◷",  "Historique")
-# btn_aide  = make_nav_btn(left_frame, "?",  "Aide / Guide")
-# btn_param = make_nav_btn(left_frame, "⚙",  "Paramètres")
-# btn_about = make_nav_btn(left_frame, "ℹ",  "À propos")
-
-# ── Mode toggle — pinned to bottom ────────────────────────────────────────────
+#changer mode
 def change_mode():
     mode = customtkinter.get_appearance_mode()
     if mode == "Light":
@@ -228,6 +218,86 @@ graph = customtkinter.CTkFrame(master=intro,
 graph.pack(side="right", padx=20, pady=10)
 
 image_graph = Image.open("graphe.png")
-img_graph = customtkinter.CTkImage(size=(240, 130))
+img_graph = customtkinter.CTkImage(light_image=image_graph,
+                                dark_image=image_graph,
+                                size=(240, 130))
 label_graph = customtkinter.CTkLabel(master=graph, image=img_graph, text="")
 label_graph.pack()
+#central cards for axes
+cards = customtkinter.CTkFrame(master=main_frame, 
+                               fg_color="transparent"
+)
+cards.pack(fill="both", expand=True, padx=20, pady=(0, 5))
+
+#we use a function to create each card to avoid code repetition
+def make_axis_card(icon_file, title, subtitle, description, btn_color, hover, bg_color):
+    carte = customtkinter.CTkFrame(master=cards,
+                                   fg_color=bg_color,
+                                   corner_radius=12,
+                                   border_width=1,
+                                   border_color="#e8e8e8"
+    )
+    carte.pack(side="left", fill="both", expand=True, padx=6)
+
+    # Icon image
+    img_raw = Image.open(icon_file)
+    img_ctk = customtkinter.CTkImage(light_image=img_raw,
+                                    dark_image=img_raw,
+                                    size=(100, 100)
+    )
+    lbl_icon = customtkinter.CTkLabel(master=carte, image=img_ctk, text="")
+    lbl_icon.pack(expand=True)
+
+    # card body
+    body = customtkinter.CTkFrame(master=carte, fg_color="transparent")
+    body.pack(fill="both", expand=True, padx=12, pady=8)
+
+    lbl_title = customtkinter.CTkLabel( master=body,
+                                        text=title,
+                                        font=customtkinter.CTkFont(size=25, weight="bold"),
+                                        text_color="#0d1b2e"
+    )
+    lbl_title.pack(anchor="w")
+
+    lbl_sub = customtkinter.CTkLabel(master=body,
+                                     text=subtitle,
+                                     font=customtkinter.CTkFont(size=18, weight="bold"),
+                                     text_color="#0d1b2e"
+    )
+    lbl_sub.pack(anchor="w", pady=(10, 5))
+
+    lbl_desc = customtkinter.CTkLabel(master=body,
+                                      text=description,
+                                      font=customtkinter.CTkFont(size=15),
+                                      text_color="#666",
+                                      justify="left",
+                                      wraplength=190
+    )
+    lbl_desc.pack(anchor="w")
+
+    # Arrow button — bottom right
+    btn_arrow = customtkinter.CTkButton(master=body, 
+                                        text="→",
+                                        width=36,
+                                        height=36,
+                                        fg_color=btn_color,
+                                        text_color="white",
+                                        hover_color=hover,
+                                        font=customtkinter.CTkFont(size=18),
+                                        corner_radius=50
+    )
+    btn_arrow.pack(pady=(50, 4), anchor= tkinter.CENTER)
+
+    return carte
+
+
+# axe 1
+make_axis_card("fx.png", "Axe 1", "Fonctions non linéaires", "Résolution d'équations non linéaires et analyse de fonctions.","#f5c518", "#e6b800", "#ece8d8")
+
+# axe 2
+make_axis_card("matrix.png", "Axe 2", "Systèmes linéaires", "Résolution de systèmes linéaires directs et itératifs.", "#4285f4", "#2a6dd9", "#cad9f3")
+
+# axe 3
+make_axis_card("scatter.png", "Axe 3","Interpolation & Approximation", "Interpolation polynomiale, approximation et descente de gradient.", "#34a853", "#2a8a43", "#cdf1d7")
+
+app.mainloop()
