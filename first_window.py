@@ -148,3 +148,39 @@ btn_mode.pack(side="bottom", pady=15, padx=10, fill="x")
 
 sep2 = customtkinter.CTkFrame(master=left_frame, height=1, fg_color="#1e3050")
 sep2.pack(side="bottom", fill="x", padx=10, pady=(0, 2))
+
+#main
+main_frame = customtkinter.CTkFrame(master=app,
+                                    fg_color="#f4f6f9",
+                                    corner_radius=0
+)
+main_frame.pack(side="left", fill="both", expand=True)
+
+#top bar
+top = customtkinter.CTkFrame(master=main_frame,
+                                fg_color="#f4f6f9",
+                                height=52,
+                                corner_radius=0
+)
+top.pack(fill="x")
+top.pack_propagate(False) #fixed
+
+label_page_title = customtkinter.CTkLabel(master=top,
+                                        text="Accueil",
+                                        font=customtkinter.CTkFont(size=16, weight="bold"),
+                                        text_color="#0d1b2e"
+)
+label_page_title.pack(side="left", padx=25, pady=12)
+
+# "Guide rapide" yellow pill button
+btn_guide = customtkinter.CTkButton(master=top,
+                                    text="⚡  Guide rapide",
+                                    width=140,
+                                    height=34,
+                                    fg_color="#f5c518",
+                                    text_color="#0d1b2e",
+                                    hover_color="#e6b800",
+                                    font=customtkinter.CTkFont(size=12, weight="bold"),
+                                    corner_radius=20
+)
+btn_guide.pack(side="right", padx=(5, 8), pady=9)
