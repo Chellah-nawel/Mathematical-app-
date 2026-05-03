@@ -218,7 +218,9 @@ graph = customtkinter.CTkFrame(master=intro,
 graph.pack(side="right", padx=20, pady=10)
 
 image_graph = Image.open("graphe.png")
-img_graph = customtkinter.CTkImage(size=(240, 130))
+img_graph = customtkinter.CTkImage(light_image=image_graph,
+                                dark_image=image_graph,
+                                size=(240, 130))
 label_graph = customtkinter.CTkLabel(master=graph, image=img_graph, text="")
 label_graph.pack()
 #central cards for axes
