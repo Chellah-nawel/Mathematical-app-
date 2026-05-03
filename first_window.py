@@ -184,3 +184,50 @@ btn_guide = customtkinter.CTkButton(master=top,
                                     corner_radius=20
 )
 btn_guide.pack(side="right", padx=(5, 8), pady=9)
+
+#introduction
+intro = customtkinter.CTkFrame(master=main_frame,
+                               fg_color="white",
+                               corner_radius=12,
+                               height=165
+)
+intro.pack(fill="x", padx=20, pady=(15, 10))
+intro.pack_propagate(False)
+
+#text block
+left_text = customtkinter.CTkFrame(master=intro, 
+                                   fg_color="transparent"
+)
+left_text.pack(side="left", padx=25, pady=15, fill="y")
+
+label_welcome = customtkinter.CTkLabel(master=left_text,
+                                        text="Bienvenue dans",
+                                        font=customtkinter.CTkFont(size=15),
+                                        text_color="#555"
+)
+label_welcome.pack(anchor="w")
+
+label_app_name = customtkinter.CTkLabel(master=left_text,
+                                        text="Numerical Lab",
+                                        font=customtkinter.CTkFont(size=32, weight="bold"),
+                                        text_color="#0d1b2e"
+)
+label_app_name.pack(anchor="w")
+
+label_app_sub = customtkinter.CTkLabel(master=left_text,
+                                        text="Votre outil interactif pour l'analyse numérique",
+                                        font=customtkinter.CTkFont(size=12),
+                                        text_color="#888"
+)
+label_app_sub.pack(anchor="w", pady=(4, 0))
+
+#graph image
+graph = customtkinter.CTkFrame(master=intro, 
+                               fg_color="transparent"
+)
+graph.pack(side="right", padx=20, pady=10)
+
+image_graph = Image.open("graphe.png")
+img_graph = customtkinter.CTkImage(size=(240, 130))
+label_graph = customtkinter.CTkLabel(master=graph, image=img_graph, text="")
+label_graph.pack()
