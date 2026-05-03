@@ -115,17 +115,7 @@ btn_axe1  = make_nav_btn("⊘", "Axe 1", sub_text="Fonctions non linéaires")
 btn_axe2  = make_nav_btn("▦", "Axe 2", sub_text="Systèmes linéaires")
 btn_axe3  = make_nav_btn("📈", "Axe 3", sub_text="Interpolation &\nApproximation")
 
-# ── Second group of nav items ─────────────────────────────────────────────────
-# sep2 = customtkinter.CTkFrame(master=left_frame, height=1, fg_color="#1e3050")
-# sep2.pack(fill="x", padx=10, pady=(8, 8))
-
-# btn_comp  = make_nav_btn(left_frame, "⇌",  "Comparaison")
-# btn_hist  = make_nav_btn(left_frame, "◷",  "Historique")
-# btn_aide  = make_nav_btn(left_frame, "?",  "Aide / Guide")
-# btn_param = make_nav_btn(left_frame, "⚙",  "Paramètres")
-# btn_about = make_nav_btn(left_frame, "ℹ",  "À propos")
-
-# ── Mode toggle — pinned to bottom ────────────────────────────────────────────
+#changer mode
 def change_mode():
     mode = customtkinter.get_appearance_mode()
     if mode == "Light":
