@@ -59,7 +59,6 @@ left_col = customtkinter.CTkScrollableFrame(body,
                                   corner_radius=12, 
                                   width=186)
 left_col.pack(side="left", fill="y", padx=(0, 8))
-left_col.pack_propagate(False)
 
 #les titres
 title_algo= customtkinter.CTkLabel(left_col, 
