@@ -11,3 +11,10 @@ GREEN      = "#22a361"
 BORDER     = "#e0e0e0"
 TIP_BG     = "#fffde7"
 TIP_BORDER = "#f5e600"
+
+# cree la fenetre principale
+win = customtkinter.CTk()
+win.geometry("1080x700")
+win.title("Axe 1 — Fonctions non linéaires")
+win.configure(fg_color=LIGHT_BG)
+win._set_appearance_mode("light")
