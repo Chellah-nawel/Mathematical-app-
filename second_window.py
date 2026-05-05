@@ -86,6 +86,10 @@ def refresh_algo_btns():
                         border_width=0,
                         font=customtkinter.CTkFont(size=15)
             )
+        else:
+            btn.configure(fg_color=WHITE,
+                          font=customtkinter.CTkFont(size=13)
+            )
     for btn in op_btns.values():
         btn.configure(fg_color=WHITE,
                       font=customtkinter.CTkFont(size=13)
@@ -98,6 +102,10 @@ def refresh_op_btns():
         active = (name == sel)
         if active:
             btn.configure(fg_color=YELLOW,
+                          font=customtkinter.CTkFont(size=15)
+            )
+        else:
+            btn.configure(fg_color=WHITE,
                           font=customtkinter.CTkFont(size=13)
             )
     for btn in algo_btns.values(): # on fait aussi le refresh des boutons algo pour enlever la selection si on vient de cliquer sur une op
