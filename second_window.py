@@ -54,7 +54,7 @@ body = customtkinter.CTkFrame(win, fg_color="transparent")
 body.pack(fill="x", padx=14, pady=(10, 8))
 
 #frame des algorithmes et opérations
-left_col = customtkinter.CTkFrame(body, 
+left_col = customtkinter.CTkScrollableFrame(body, 
                                   fg_color=WHITE, 
                                   corner_radius=12, 
                                   width=186)
