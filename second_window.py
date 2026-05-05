@@ -1,4 +1,5 @@
 import customtkinter
+import tkinter as tk
 
 #identifier la palette de couleurs utilisée dans l'application
 YELLOW     = "#f5c518"
@@ -67,3 +68,47 @@ title_algo= customtkinter.CTkLabel(left_col,
                                     text_color=DARK
 )
 title_algo.pack(anchor="w", padx=14, pady=(14, 6))
+
+#declarer les variables a utiliser
+algo_btns    = {} # il sert a garder une reference vers les boutons algo pour pouvoir les mettre a jour lors de la selection
+op_btns      = {}
+current_sel  = tk.StringVar() #il contient l'algo ou l'pt selectionne
+current_mode = tk.StringVar(value="algo")  #algo pour les algos, op pour les operations 
+
+#algo pour manipulation des btn
+#si on click sur un btn d'une algo 
+def refresh_algo_btns():
+    sel = current_sel.get()
+    for name, btn in algo_btns.items():
+        active = (name == sel)
+        if active:
+            btn.configure(fg_color=YELLOW,
+                        border_width=0,
+                        font=customtkinter.CTkFont(size=15)
+            )
+    for btn in op_btns.values():
+        btn.configure(fg_color=WHITE,
+                      font=customtkinter.CTkFont(size=13)
+        )
+
+#si on click sur une opt
+def refresh_op_btns():
+    sel = current_sel.get()
+    for name, btn in op_btns.items():
+        active = (name == sel)
+        if active:
+            btn.configure(fg_color=YELLOW,
+                          font=customtkinter.CTkFont(size=13)
+            )
+    for btn in algo_btns.values(): # on fait aussi le refresh des boutons algo pour enlever la selection si on vient de cliquer sur une op
+        btn.configure(fg_color=WHITE, 
+                      border_width=1,
+                      font=customtkinter.CTkFont(size=13)
+        )    
+
+#on fait une seule fonction qui regroupe tous
+def select_algo(name):
+    current_sel.set(name) 
+    current_mode.set("algo")
+    refresh_algo_btns()
+    #il y aura d'autres fonctions ca depend la logique
