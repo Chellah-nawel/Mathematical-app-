@@ -47,3 +47,23 @@ title= customtkinter.CTkLabel(header,
                         text_color=DARK
 )
 title.pack(side="left")
+
+#frame principale
+body = customtkinter.CTkFrame(win, fg_color="transparent")
+body.pack(fill="x", padx=14, pady=(10, 8))
+
+#frame des algorithmes et opérations
+left_col = customtkinter.CTkFrame(body, 
+                                  fg_color=WHITE, 
+                                  corner_radius=12, 
+                                  width=186)
+left_col.pack(side="left", fill="y", padx=(0, 8))
+left_col.pack_propagate(False)
+
+#les titres
+title_algo= customtkinter.CTkLabel(left_col, 
+                                   text="Algorithmes",
+                                    font=customtkinter.CTkFont(size=13, weight="bold"),
+                                    text_color=DARK
+)
+title_algo.pack(anchor="w", padx=14, pady=(14, 6))
