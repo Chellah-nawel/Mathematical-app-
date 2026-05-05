@@ -112,3 +112,22 @@ def select_algo(name):
     current_mode.set("algo")
     refresh_algo_btns()
     #il y aura d'autres fonctions ca depend la logique
+
+#creation des bouttons pour les algorithmes
+for algo in ["Dichotomie", "Newton", "Point fixe"]:
+    b = customtkinter.CTkButton(left_col, 
+                                text=algo, 
+                                width=158, 
+                                height=38,
+                                fg_color= WHITE,
+                                text_color=DARK, 
+                                hover_color=YELLOW_HVR,
+                                anchor="w", 
+                                corner_radius=8,
+                                border_width=1,
+                                border_color=BORDER,
+                                font=customtkinter.CTkFont(size=13, weight="bold"),
+        command= select_algo(algo)
+    )
+    b.pack(padx=14, pady=3)
+    algo_btns[algo] = b #on les ajoute dans la liste des btn
