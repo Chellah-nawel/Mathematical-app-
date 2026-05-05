@@ -138,3 +138,45 @@ for algo in ["Dichotomie", "Newton", "Point fixe"]:
     )
     b.pack(padx=14, pady=3)
     algo_btns[algo] = b #on les ajoute dans la liste des btn
+
+#separateur
+sep= customtkinter.CTkFrame(left_col, 
+                            height=1, 
+                            fg_color=BORDER)
+
+sep.pack(fill="x", padx=14, pady=(12, 10))
+
+#section des options
+title_opt= customtkinter.CTkLabel(left_col, 
+                                  text="Opérations sur\nles fonctions",
+                                  font=customtkinter.CTkFont(size=13, weight="bold"),
+                                  text_color=DARK, 
+                                  justify="left"
+)
+title_opt.pack(anchor="w", padx=14, pady=(0, 6))
+
+#pour options
+def select_op(name):
+    current_sel.set(name)
+    current_mode.set("op")
+    refresh_op_btns()
+    # on ajoute d'atres fonctions
+
+#options
+for op in ["Dérivée", "Continuité", "Table de variation", "Signe de f(x)"]:
+    b = customtkinter.CTkButton(left_col, 
+                                text=op, 
+                                width=158, 
+                                height=34,
+                                fg_color=WHITE, 
+                                text_color=DARK, 
+                                hover_color=YELLOW_HVR,
+                                anchor="w", 
+                                corner_radius=8,
+                                border_width=1, 
+                                border_color=BORDER,
+                                font=customtkinter.CTkFont(size=13),
+                                command=lambda n=op: select_op(n)
+    )
+    b.pack(padx=14, pady=3)
+    op_btns[op] = b
