@@ -50,8 +50,10 @@ title= customtkinter.CTkLabel(header,
 title.pack(side="left")
 
 #frame principale
-body = customtkinter.CTkFrame(win, fg_color="transparent")
-body.pack(fill="x", padx=14, pady=(10, 8))
+body = customtkinter.CTkFrame(win, 
+                              fg_color="transparent"
+)
+body.pack(fill="both", expand=False, padx=14, pady=(10, 8))
 
 #frame des algorithmes et opérations
 left_col = customtkinter.CTkScrollableFrame(body, 
@@ -118,6 +120,8 @@ def select_algo(name):
     current_sel.set(name) 
     current_mode.set("algo")
     refresh_algo_btns()
+    update_inputs(name)
+    update_mode_ui()
     #il y aura d'autres fonctions ca depend la logique
 
 #creation des bouttons pour les algorithmes
@@ -160,6 +164,8 @@ def select_op(name):
     current_sel.set(name)
     current_mode.set("op")
     refresh_op_btns()
+    update_mode_ui()
+    update_inputs(name)
     # on ajoute d'atres fonctions
 
 #options
@@ -185,8 +191,8 @@ for op in ["Dérivée", "Continuité", "Table de variation", "Signe de f(x)"]:
 saisir = customtkinter.CTkFrame(body, 
                                 fg_color=WHITE, 
                                 corner_radius=12, 
-                                width=295,
-                                height=400)
+                                width=295
+)
 saisir.pack(side="left", fill="y", padx=(0, 8))
 saisir.pack_propagate(False)
 
@@ -350,8 +356,8 @@ lbl_tip = customtkinter.CTkLabel(box,
                                  text=RECO["Dichotomie"],
                                  font=customtkinter.CTkFont(size=11), 
                                  text_color="#7a6500",
-                                 justify="left", 
-                                 wraplength=190)
+                                 justify="left"
+)
 lbl_tip.pack(anchor="w", padx=10, pady=(0, 8))
 
 #  a faire
@@ -426,3 +432,86 @@ btnsauv= customtkinter.CTkButton(header,
     # command=on_exporter a faire
 )
 btnsauv.pack(side="right")
+
+#fonction pour les mises a jour
+def update_inputs(name):
+    mode = current_mode.get()
+
+    # cacher tout
+    lbl_interval.pack_forget()
+    group.pack_forget()
+    inputtol.pack_forget()
+    toler.pack_forget()
+
+    if mode == "algo":
+        if name == "Dichotomie" or name == "Newton":
+            lbl_interval.pack(anchor="w", padx=16)
+            group.pack(padx=16, pady=(3, 12))
+            toler.pack(anchor="w", padx=16)
+            inputtol.pack(padx=16, pady=(3, 12))
+
+        elif name == "Point fixe":
+            toler.pack(anchor="w", padx=16)
+            inputtol.pack(padx=16, pady=(3, 12))
+
+    elif mode == "op":
+        if name == "Dérivée":
+            # juste f(x)
+            pass
+
+        elif name == "Continuité":
+            lbl_interval.pack(anchor="w", padx=16)
+            group.pack(padx=16, pady=(3, 12))
+
+        elif name == "Table de variation":
+            lbl_interval.pack(anchor="w", padx=16)
+            group.pack(padx=16, pady=(3, 12))
+
+        elif name == "Signe de f(x)":
+            lbl_interval.pack(anchor="w", padx=16)
+            group.pack(padx=16, pady=(3, 12))
+
+#fonction pour effacer les champs   
+def clear_inputs():
+    inputf.delete(0, "end")
+    inputtol.delete(0, "end")
+    a.delete(0, "end")
+    b.delete(0, "end")
+
+#fonction a utilise apres
+def get_inputs():
+    return {
+        "f": inputf.get(),
+        "a": a.get(),
+        "b": b.get(),
+        "tol": inputtol.get(),
+        "mode": current_mode.get(), #le mode soit algo ou opt
+        "selection": current_sel.get() #il a selectionner quoi
+    }
+
+resultat = customtkinter.CTkFrame(body, 
+                                fg_color=WHITE, 
+                                corner_radius=12)
+
+titreres= customtkinter.CTkLabel(resultat,
+                                        text="Résultats",
+                                        font=customtkinter.CTkFont(size=14, weight="bold"), 
+                                        text_color=DARK
+        )
+titreres.pack(anchor="w", padx=16, pady=(14, 8))
+
+def update_mode_ui():
+    mode = current_mode.get()
+
+    if mode == "algo":
+        visualisation.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+        result.pack(side="left", fill="both", expand=True)
+
+    elif mode == "op":
+        # cacher visualisation
+        visualisation.pack_forget()
+        # agrandir la zone resultat
+        result.pack_forget()
+        resultat.pack(side="left", fill="both", expand=True)
+
+win.mainloop()
