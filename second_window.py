@@ -514,4 +514,5 @@ def update_mode_ui():
         result.pack_forget()
         resultat.pack(side="left", fill="both", expand=True)
 
+
 win.mainloop()
