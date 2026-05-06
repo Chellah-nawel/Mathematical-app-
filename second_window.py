@@ -362,6 +362,36 @@ def update_reco():
     algo = best_algo()
     lbl_tip.configure(text=RECO.get(algo, ""))
 
+#btn iterations
+btn_iter= customtkinter.CTkButton(result, 
+                                  text="voir iteration",
+                                  width=263, 
+                                  height=44,
+                                  fg_color=WHITE, 
+                                  text_color=DARK, 
+                                  hover_color=YELLOW_HVR,
+                                  font=customtkinter.CTkFont(size=14, weight="bold"),
+                                  corner_radius=10,
+                                  border_color= YELLOW,
+                                  border_width=1
+    # command=tableau des resultats a faire
+)
+btn_iter.pack(side="left" , pady=10, padx=15)
+
+#btn comparaison
+btn_meth= customtkinter.CTkButton(result, 
+                                  text="comparer methodes",
+                                  width=263, 
+                                  height=44,
+                                  fg_color=YELLOW, 
+                                  text_color=DARK, 
+                                  hover_color=YELLOW_HVR,
+                                  font=customtkinter.CTkFont(size=14, weight="bold"),
+                                  corner_radius=10
+    # command=tableau des resultats a faire
+)
+btn_meth.pack(side="right", pady=10, padx=16)
+
 #partie visaulaisation
 visualisation = customtkinter.CTkFrame(win, 
                                        fg_color=WHITE, 
