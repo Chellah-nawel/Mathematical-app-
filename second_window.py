@@ -287,3 +287,39 @@ btn_calc= customtkinter.CTkButton(saisir,
     # command=on_calculer a faire
 )
 btn_calc.pack(side="bottom", pady=14, padx=16)
+
+#partie resultat 
+result = customtkinter.CTkFrame(body, 
+                                fg_color=WHITE, 
+                                corner_radius=12)
+result.pack(side="left", fill="both", expand=True)
+
+#titre 
+titreres= customtkinter.CTkLabel(result,
+                                text="Résultats",
+                                font=customtkinter.CTkFont(size=14, weight="bold"), 
+                                text_color=DARK
+)
+titreres.pack(anchor="w", padx=16, pady=(14, 8))
+
+#fonction pour creer  les lables de le bloc resultat 
+def result_block(title, default="—", val_color=DARK, val_size=22):
+    f = customtkinter.CTkFrame(result,
+                               fg_color="transparent")
+    f.pack(anchor="w", padx=16, pady=(0, 10))
+    l= customtkinter.CTkLabel(f, 
+                              text=title,
+                              font=customtkinter.CTkFont(size=11), 
+                              text_color=GREY
+    )
+    l.pack(anchor="w")
+    lv = customtkinter.CTkLabel(f, 
+                                text=default,
+                                font=customtkinter.CTkFont(size=val_size, weight="bold"),
+                                text_color=val_color)
+    lv.pack(anchor="w")
+    return lv
+
+lbl_racine = result_block("Racine trouvée",      "—", GREEN, 20)
+lbl_iters  = result_block("Nombre d'itérations", "—", DARK,  24)
+lbl_frac   = result_block("Valeur de f(racine)", "—", DARK,  14)
