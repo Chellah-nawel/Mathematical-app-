@@ -208,3 +208,89 @@ for op in ["Normes induites", "Conditionnement", "Déterminant", "Transposée", 
     )
     b.pack(padx=14, pady=3)
     op_btns[op] = b
+
+#body
+body = customtkinter.CTkFrame(body, 
+                              fg_color=WHITE, 
+                              corner_radius=12, 
+                              width=420)
+body.pack(side="left", fill="y", padx=(0, 8))
+body.pack_propagate(False)
+
+top_row = customtkinter.CTkFrame(body, 
+                                 fg_color="transparent")
+top_row.pack(fill="x", padx=16, pady=(14, 6))
+
+lab_mat= customtkinter.CTkLabel(top_row, 
+                                text="Matrice A",
+                                font=customtkinter.CTkFont(size=13, weight="bold"),     
+                                text_color=DARK
+)
+lab_mat.pack(side="left", padx=(0, 130))
+
+lab_b= customtkinter.CTkLabel(top_row, 
+                              text="bcteur b",
+                              font=customtkinter.CTkFont(size=13, weight="bold"), 
+                              text_color=DARK
+)
+lab_b.pack(side="left")
+
+# Taille de la matrice par defaut 3
+size = tk.IntVar(value=3)
+
+# Frame contenant la grille
+matrix_frame = customtkinter.CTkFrame(body, 
+                                      fg_color="transparent")
+matrix_frame.pack(padx=16, pady=(0, 8))
+
+# Stockage des Entry widgets
+mat_input = []
+vec_input = [] 
+
+def mat_grid(n):
+    for widget in matrix_frame.winfo_children():
+        widget.destroy()
+    mat_input.clear()
+    vec_input.clear()
+
+    for i in range(n):
+        row = []
+        for j in range(n):
+            e = customtkinter.CTkEntry(matrix_frame, 
+                                       width=58, 
+                                       height=36,
+                                       corner_radius=6, 
+                                       border_color=BORDER, 
+                                       border_width=1,
+                                       fg_color=WHITE, 
+                                       text_color=DARK,
+                                       font=customtkinter.CTkFont(size=12),
+                                       justify="center"
+            )
+            e.grid(row=i, column=j, padx=3, pady=3)
+            row.append(e)
+        mat_input.append(row)
+
+        # separateur entre A et b
+        sep_lbl = customtkinter.CTkLabel(matrix_frame, 
+                                         text="│", 
+                                         text_color=BORDER,
+                                         font=customtkinter.CTkFont(size=18))
+        sep_lbl.grid(row=i, column=n, padx=4)
+
+        # vecteur b
+        b= customtkinter.CTkEntry(matrix_frame, 
+                                  width=58, 
+                                  height=36,
+                                  corner_radius=6, 
+                                  border_color=BORDER,
+                                  border_width=1,
+                                  fg_color=WHITE, 
+                                  text_color=DARK,
+                                  font=customtkinter.CTkFont(size=12),
+                                  justify="center"
+        )
+        b.grid(row=i, column=n + 1, padx=3, pady=3)
+        vec_input.append(b)
+
+mat_grid(3)
