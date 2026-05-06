@@ -323,3 +323,41 @@ def result_block(title, default="—", val_color=DARK, val_size=22):
 lbl_racine = result_block("Racine trouvée",      "—", GREEN, 20)
 lbl_iters  = result_block("Nombre d'itérations", "—", DARK,  24)
 lbl_frac   = result_block("Valeur de f(racine)", "—", DARK,  14)
+
+#recommandation message 
+RECO = {
+    "Dichotomie"  : "Méthode de dichotomie est\n recommandee pour cette\n fonction (convergence rapide)",
+    "Newton"      : "Méthode de Newton est\n recommandee pour cette\n fonction (convergence rapide)",
+    "Point fixe"  : "Méthode de Point fixe est\n recommandee pour cette\n fonction (convergence rapide)",
+}
+
+#recommandation
+box = customtkinter.CTkFrame(result, 
+                                fg_color=TIP_BG,
+                                corner_radius=10, 
+                                border_width=1, 
+                                border_color=TIP_BORDER)
+box.pack(fill="x", padx=16, pady=(4, 8))
+
+rec=customtkinter.CTkLabel(box, 
+                       text="💡  Recommandation",
+                       font=customtkinter.CTkFont(size=12, weight="bold"), 
+                       text_color="#7a6500"
+)
+rec.pack(anchor="w", padx=10, pady=(8, 2))
+
+lbl_tip = customtkinter.CTkLabel(box,
+                                 text=RECO["Dichotomie"],
+                                 font=customtkinter.CTkFont(size=11), 
+                                 text_color="#7a6500",
+                                 justify="left", 
+                                 wraplength=190)
+lbl_tip.pack(anchor="w", padx=10, pady=(0, 8))
+
+#  a faire
+def best_algo():
+    return 
+
+def update_reco():
+    algo = best_algo()
+    lbl_tip.configure(text=RECO.get(algo, ""))
