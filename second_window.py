@@ -180,3 +180,77 @@ for op in ["Dérivée", "Continuité", "Table de variation", "Signe de f(x)"]:
     )
     b.pack(padx=14, pady=3)
     op_btns[op] = b
+
+# partie des champs
+saisir = customtkinter.CTkFrame(body, 
+                                fg_color=WHITE, 
+                                corner_radius=12, 
+                                width=295)
+saisir.pack(side="left", fill="y", padx=(0, 8))
+saisir.pack_propagate(False)
+
+#titre
+title_param= customtkinter.CTkLabel(saisir, 
+                       text="Paramètres",
+                       font=customtkinter.CTkFont(size=15, weight="bold"), 
+                       text_color=DARK
+)
+title_param.pack(anchor="w", padx=16, pady=(14, 8))
+
+#label pour f(x)
+flabel= customtkinter.CTkLabel(saisir, 
+                       text="Définir la fonction",
+                       font=customtkinter.CTkFont(size=13), 
+                       text_color=DARK
+)
+flabel.pack(anchor="w", padx=16)
+
+#input
+inputf = customtkinter.CTkEntry(saisir, 
+                                width=263, 
+                                height=38, 
+                                corner_radius=8,
+                                border_color=BORDER, 
+                                border_width=1,
+                                text_color= DARK,
+                                fg_color=WHITE,
+                                font=customtkinter.CTkFont(size=12),
+                                placeholder_text=" ex: x**3 - 2*x - 5"
+)
+inputf.pack(padx=16, pady=(3, 12))
+
+#intervalle
+lbl_interval = customtkinter.CTkLabel(saisir,
+                                       text="Intervalle [a, b]",
+                                       font=customtkinter.CTkFont(size=13), 
+                                       text_color=DARK)
+
+#frame pour les deux champs
+group = customtkinter.CTkFrame(saisir, fg_color="transparent")
+
+#a
+a = customtkinter.CTkEntry(group, 
+                           placeholder_text="a",
+                           width=124, 
+                           height=38, 
+                           corner_radius=8,
+                           border_color=BORDER,
+                           text_color= DARK,
+                           fg_color=WHITE, 
+                           border_width=1, 
+                           font=customtkinter.CTkFont(size=12))
+
+#b
+b = customtkinter.CTkEntry(group, 
+                           placeholder_text="b",
+                           width=124, 
+                           height=38, 
+                           corner_radius=8,
+                           border_color=BORDER,
+                           text_color= DARK,
+                           fg_color=WHITE,
+                           border_width=1, 
+                           font=customtkinter.CTkFont(size=12))
+
+a.pack(side="left", padx=(0, 6))
+b.pack(side="left")
