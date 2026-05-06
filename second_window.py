@@ -134,7 +134,7 @@ for algo in ["Dichotomie", "Newton", "Point fixe"]:
                                 border_width=1,
                                 border_color=BORDER,
                                 font=customtkinter.CTkFont(size=13, weight="normal"),
-        command= select_algo(algo)
+        command= lambda n= algo: select_algo(n)
     )
     b.pack(padx=14, pady=3)
     algo_btns[algo] = b #on les ajoute dans la liste des btn
