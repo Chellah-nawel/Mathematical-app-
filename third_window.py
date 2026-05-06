@@ -294,3 +294,71 @@ def mat_grid(n):
         vec_input.append(b)
 
 mat_grid(3)
+
+
+# boutons remplir / aleatoire 
+btns= customtkinter.CTkFrame(body, 
+                                 fg_color="transparent")
+btns.pack(padx=16, pady=(4, 12))
+
+def on_vide():
+    for row in mat_input:
+        for e in row:
+            e.delete(0, "end")
+    for e in vec_input:
+        e.delete(0, "end")
+
+def on_aleatoire():
+    import random
+    n = size.get()
+    for i in range(n):
+        for j in range(n):
+            mat_input[i][j].delete(0, "end")
+            mat_input[i][j].insert(0, str(random.randint(-9, 9)))
+        vec_input[i].delete(0, "end")
+        vec_input[i].insert(0, str(random.randint(1, 20)))
+
+
+for txt, cmd in [("Effacer", on_vide), ("Aléatoire", on_aleatoire)]:
+    button= customtkinter.CTkButton(btns, 
+                            text=txt, 
+                            width=100, 
+                            height=32,
+                            fg_color=LIGHT_BG, 
+                            text_color=DARK, 
+                            hobr_color=BORDER,
+                            border_width=1, 
+                            border_color=BORDER,
+                            corner_radius=8,
+                            font=customtkinter.CTkFont(size=12),
+                            command=cmd
+    )
+    button.pack(side="left", padx=4)
+
+#changer size 
+size_row = customtkinter.CTkFrame(body, 
+                                  fg_color="transparent")
+size_row.pack(padx=16, pady=(0, 10))
+
+lab_size= customtkinter.CTkLabel(size_row, text="Taille  n×n :",
+                                 font=customtkinter.CTkFont(size=12), 
+                                 text_color=GREY
+)
+lab_size.pack(side="left", padx=(0, 8))
+
+size_menu = customtkinter.CTkOptionMenu(size_row, 
+                                        values=["2", "3", "4", "5", "6"],
+                                        width=70, 
+                                        height=30, 
+                                        corner_radius=6,
+                                        fg_color=WHITE, 
+                                        text_color=DARK,
+                                        button_color=YELLOW, 
+                                        button_hobr_color=YELLOW_HVR,
+                                        dropdown_fg_color=WHITE, 
+                                        dropdown_text_color=DARK,
+                                        font=customtkinter.CTkFont(size=12),
+                                        command=lambda val: [size.set(int(val)), mat_grid(int(val))]
+)
+size_menu.set("3")
+size_menu.pack(side="left")
