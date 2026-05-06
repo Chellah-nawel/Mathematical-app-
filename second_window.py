@@ -185,7 +185,8 @@ for op in ["Dérivée", "Continuité", "Table de variation", "Signe de f(x)"]:
 saisir = customtkinter.CTkFrame(body, 
                                 fg_color=WHITE, 
                                 corner_radius=12, 
-                                width=295)
+                                width=295,
+                                height=400)
 saisir.pack(side="left", fill="y", padx=(0, 8))
 saisir.pack_propagate(False)
 
@@ -254,3 +255,35 @@ b = customtkinter.CTkEntry(group,
 
 a.pack(side="left", padx=(0, 6))
 b.pack(side="left")
+
+#tolerance
+toler = customtkinter.CTkLabel(saisir, 
+                               text="Tolérance",
+                               font=customtkinter.CTkFont(size=13), 
+                               text_color=DARK)
+toler.pack(anchor="w", padx=16)
+
+inputtol = customtkinter.CTkEntry(saisir, 
+                                  width=263, 
+                                  height=38,
+                                  corner_radius=8, 
+                                  border_color=BORDER,
+                                  text_color= DARK,
+                                  fg_color=WHITE, 
+                                  border_width=1,
+                                  font=customtkinter.CTkFont(size=12))
+inputtol.pack(padx=16, pady=(3, 12))
+
+#btn de calcule
+btn_calc= customtkinter.CTkButton(saisir, 
+                                  text="▶   Calculer",
+                                  width=263, 
+                                  height=44,
+                                  fg_color=YELLOW, 
+                                  text_color=DARK, 
+                                  hover_color=YELLOW_HVR,
+                                  font=customtkinter.CTkFont(size=14, weight="bold"),
+                                  corner_radius=10
+    # command=on_calculer a faire
+)
+btn_calc.pack(side="bottom", pady=14, padx=16)
