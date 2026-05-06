@@ -401,3 +401,38 @@ tol_input = customtkinter.CTkEntry(param_frame,
                                    placeholder_text="0.00001")
 
 tol_input.grid(row=1, column=0, padx=(0, 12), pady=(4, 0))
+
+#parametre omiga
+relax_frame = customtkinter.CTkFrame(parametres, fg_color="transparent")
+
+par_titre= customtkinter.CTkLabel(relax_frame, text="Paramètre ω (SOR)",
+                       font=customtkinter.CTkFont(size=12), 
+                       text_color=DARK)
+par_titre.pack(anchor="w", pady=(8, 2))
+
+omega = customtkinter.CTkEntry(relax_frame, 
+                                     width=110, 
+                                     height=34, 
+                                     corner_radius=6,
+                                     border_color=BORDER, 
+                                     border_width=1, 
+                                     fg_color=WHITE, 
+                                     text_color=DARK,
+                                     font=customtkinter.CTkFont(size=12), 
+                                     placeholder_text="1.25"
+)
+omega.pack(anchor="w")
+
+#calculer
+btn_calc = customtkinter.CTkButton(body, 
+                                   text="▶   Calculer",
+                                   width=263, 
+                                   height=44,
+                                   fg_color=YELLOW, 
+                                   text_color=WHITE, 
+                                   hover_color=YELLOW_HVR,
+                                   font=customtkinter.CTkFont(size=14, weight="bold"), 
+                                   corner_radius=10
+    # command=on_calculer  ← à connecter par l'équipe logique
+)
+btn_calc.pack(side="bottom", pady=14, padx=16)
