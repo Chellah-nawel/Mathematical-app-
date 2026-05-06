@@ -362,3 +362,42 @@ size_menu = customtkinter.CTkOptionMenu(size_row,
 )
 size_menu.set("3")
 size_menu.pack(side="left")
+
+sep3= customtkinter.CTkFrame(body, 
+                            height=1, 
+                            fg_color=BORDER)
+sep3.pack(fill="x", padx=16, pady=(4, 10))
+
+#parametres iteratifs 
+parametres = customtkinter.CTkFrame(body, 
+                                    fg_color="transparent")
+
+titre_p = customtkinter.CTkLabel(parametres, 
+                                    text="Paramètres (Itératif)",
+                                    font=customtkinter.CTkFont(size=13, weight="bold"), 
+                                    text_color=DARK
+)
+titre_p.pack(anchor="w", padx=0, pady=(0, 6))
+
+param_frame = customtkinter.CTkFrame(parametres, 
+                                    fg_color="transparent")
+param_frame.pack(anchor="w")
+
+tol=customtkinter.CTkLabel(param_frame, 
+                           text="Tolérance",
+                            font=customtkinter.CTkFont(size=12), 
+                            text_color=DARK)
+tol.grid(row=0, column=0, sticky="w", padx=(0,12))
+
+tol_input = customtkinter.CTkEntry(param_frame, 
+                                   width=110, 
+                                   height=34, 
+                                   corner_radius=6,
+                                   border_color=BORDER, 
+                                   border_width=1, 
+                                   fg_color=WHITE, 
+                                   text_color=DARK,
+                                   font=customtkinter.CTkFont(size=12), 
+                                   placeholder_text="0.00001")
+
+tol_input.grid(row=1, column=0, padx=(0, 12), pady=(4, 0))
