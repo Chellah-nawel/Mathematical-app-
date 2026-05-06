@@ -144,3 +144,35 @@ for algo in ["Gauss", "LU"]:
     )
     b.pack(padx=14, pady=3)
     algo_btns[algo] = b
+
+#separateur
+separ1=customtkinter.CTkFrame(sidebar, 
+                              height=1, 
+                              fg_color=BORDER)
+separ1.pack(fill="x", padx=14, pady=(10, 8))
+
+# algo indirects
+titre_indirects = customtkinter.CTkLabel(sidebar, 
+                                         text="Algorithmes indirects",
+                                         font=customtkinter.CTkFont(size=13, weight="bold"),    
+                                         text_color=DARK
+)
+titre_indirects.pack(anchor="w", padx=14, pady=(0, 6))
+
+for algo in ["Jacobi", "Gauss-Seidel", "Relaxation (SOR)"]:
+    b = customtkinter.CTkButton(sidebar, 
+                                text=algo, 
+                                width=158, 
+                                height=38,
+                                fg_color=WHITE, 
+                                text_color=DARK, 
+                                hover_color=YELLOW_HVR,
+                                anchor="w", 
+                                corner_radius=8, 
+                                border_width=1, 
+                                border_color=BORDER,
+                                font=customtkinter.CTkFont(size=13, weight="normal"),
+                                command=lambda n=algo: select_algo(n)
+    )
+    b.pack(padx=14, pady=3)
+    algo_btns[algo] = b
