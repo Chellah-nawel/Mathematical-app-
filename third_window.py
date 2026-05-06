@@ -176,3 +176,35 @@ for algo in ["Jacobi", "Gauss-Seidel", "Relaxation (SOR)"]:
     )
     b.pack(padx=14, pady=3)
     algo_btns[algo] = b
+
+sip2= customtkinter.CTkFrame(sidebar, 
+                             height=1, 
+                             fg_color=BORDER)
+sip2.pack(fill="x", padx=14, pady=(12, 10))
+
+#operations sur matrices
+titre_op = customtkinter.CTkLabel(sidebar, 
+                                 text="Opérations sur\nles matrices",
+                                 font=customtkinter.CTkFont(size=13, weight="bold"), 
+                                 text_color=DARK, 
+                                 justify="left"
+)
+titre_op.pack(anchor="w", padx=14, pady=(0, 6))
+
+for op in ["Normes induites", "Conditionnement", "Déterminant", "Transposée", "Inverse"]:
+    b = customtkinter.CTkButton(sidebar, 
+                                text=op, 
+                                width=158, 
+                                height=34,
+                                fg_color=WHITE, 
+                                text_color=DARK, 
+                                hover_color=YELLOW_HVR,
+                                anchor="w", 
+                                corner_radius=8, 
+                                border_width=1, 
+                                border_color=BORDER,
+                                font=customtkinter.CTkFont(size=13),
+                                command=lambda n=op: select_op(n)
+    )
+    b.pack(padx=14, pady=3)
+    op_btns[op] = b
