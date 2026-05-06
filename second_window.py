@@ -326,9 +326,9 @@ lbl_frac   = result_block("Valeur de f(racine)", "—", DARK,  14)
 
 #recommandation message 
 RECO = {
-    "Dichotomie"  : "Méthode de dichotomie est\n recommandee pour cette\n fonction (convergence rapide)",
-    "Newton"      : "Méthode de Newton est\n recommandee pour cette\n fonction (convergence rapide)",
-    "Point fixe"  : "Méthode de Point fixe est\n recommandee pour cette\n fonction (convergence rapide)",
+    "Dichotomie"  : "Méthode de dichotomie est recommandee pour cette fonction (convergence rapide)",
+    "Newton"      : "Méthode de Newton est recommandee pour cette fonction (convergence rapide)",
+    "Point fixe"  : "Méthode de Point fixe est recommandee pour cette fonction (convergence rapide)",
 }
 
 #recommandation
@@ -361,3 +361,38 @@ def best_algo():
 def update_reco():
     algo = best_algo()
     lbl_tip.configure(text=RECO.get(algo, ""))
+
+#partie visaulaisation
+visualisation = customtkinter.CTkFrame(win, 
+                                       fg_color=WHITE, 
+                                       corner_radius=12)
+visualisation.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+
+#header
+header = customtkinter.CTkFrame(visualisation, 
+                                fg_color="transparent")
+header.pack(fill="x", padx=14, pady=(10, 0))
+
+#title
+vistitle=customtkinter.CTkLabel(header, 
+                                text="Visualisation",
+                                font=customtkinter.CTkFont(size=13, weight="bold"), 
+                                text_color=DARK
+)
+vistitle.pack(side="left")
+
+#btn sauvgarde grph
+btnsauv= customtkinter.CTkButton(header, 
+                                 text="⬇  Exporter résultats",
+                                 width=160,
+                                 height=30,
+                                 fg_color=LIGHT_BG, 
+                                 text_color=DARK,
+                                 hover_color=BORDER,
+                                 border_width=1,
+                                 border_color=BORDER,
+                                 corner_radius=8, 
+                                 font=customtkinter.CTkFont(size=11)
+    # command=on_exporter a faire
+)
+btnsauv.pack(side="right")
