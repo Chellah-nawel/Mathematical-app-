@@ -468,8 +468,16 @@ radio_continu = customtkinter.CTkRadioButton(mc_mode_row,
 radio_continu.pack(side="left")
 
 # champ fonction (cas continu)
-mc_func_frame = customtkinter.CTkFrame(mc_frame, 
-                                       fg_color="transparent")
+mc_func_frame = customtkinter.CTkFrame(body, 
+                                        fg_color=WHITE, 
+                                       corner_radius=12, 
+                                       width=186)
+
+titre_function= customtkinter.CTkLabel(mc_func_frame, 
+                       text="Inputs",
+                       font=customtkinter.CTkFont(size=15, weight="bold"), 
+                       text_color=DARK)
+titre_function.pack(anchor="w")
 
 func_lab= customtkinter.CTkLabel(mc_func_frame, 
                        text="Définir f(x)",
