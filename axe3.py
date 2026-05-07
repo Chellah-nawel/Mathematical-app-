@@ -16,7 +16,7 @@ def show(app, navigate):
     BTN_DEL    = "#e53935"
 
 
-    header_bar = customtkinter.CTkFrame(app, 
+    header_bar = customtkinter.CTkFrame(app, bg_color=WHITE, 
                                         fg_color=WHITE, 
                                         corner_radius=0, 
                                         height=54)
@@ -44,7 +44,7 @@ def show(app, navigate):
     title.pack(side="left")
 
     # visualisation en bas
-    vis_outer = customtkinter.CTkFrame(app, 
+    vis_outer = customtkinter.CTkFrame(app, bg_color=WHITE,
                                     fg_color=WHITE, 
                                     corner_radius=12)
     vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
@@ -73,12 +73,12 @@ def show(app, navigate):
     )
     btn_export.pack(side="right")
 
-    body = customtkinter.CTkFrame(app, 
+    body = customtkinter.CTkFrame(app, bg_color=WHITE,
                                 fg_color="transparent")
     body.pack(fill="both", expand=True, padx=14, pady=(10, 8))
 
     # sidebar avec scrollbar
-    sidebar = customtkinter.CTkScrollableFrame(body, 
+    sidebar = customtkinter.CTkScrollableFrame(body, bg_color=WHITE,
                                             fg_color=WHITE, 
                                             corner_radius=12, 
                                             width=186)
@@ -196,7 +196,7 @@ def show(app, navigate):
         op_btns[op] = b
 
     # les points
-    pnt_fram = customtkinter.CTkScrollableFrame(body, 
+    pnt_fram = customtkinter.CTkScrollableFrame(body, bg_color=WHITE,
                                                 fg_color=WHITE, 
                                                 corner_radius=12, 
                                                 width=340)
@@ -353,7 +353,7 @@ def show(app, navigate):
     btn_del.pack(side="left")
 
     # parametres et resultats
-    right_col = customtkinter.CTkScrollableFrame(body, 
+    right_col = customtkinter.CTkScrollableFrame(body, bg_color=WHITE,
                                                 fg_color=WHITE, 
                                                 corner_radius=12)
     right_col.pack(side="left", fill="both", expand=True)
@@ -462,7 +462,7 @@ def show(app, navigate):
     radio_continu.pack(side="left")
 
     # champ fonction (cas continu)
-    mc_func_frame = customtkinter.CTkFrame(body, 
+    mc_func_frame = customtkinter.CTkFrame(body, bg_color=WHITE,
                                             fg_color=WHITE, 
                                         corner_radius=12, 
                                         width=186)

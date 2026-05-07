@@ -15,7 +15,7 @@ def show(app, navigate):
     TIP_BORDER = "#f5e600"
 
     # header
-    header = customtkinter.CTkFrame(app,
+    header = customtkinter.CTkFrame(app, bg_color=WHITE,
                                     fg_color=WHITE,
                                     corner_radius=0,
                                     height=54)
@@ -41,7 +41,7 @@ def show(app, navigate):
     title.pack(side="left")
 
 
-    vis_frame = customtkinter.CTkFrame(app,
+    vis_frame = customtkinter.CTkFrame(app, bg_color=WHITE,
                                     fg_color=WHITE,
                                     corner_radius=12)
     vis_frame.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
@@ -76,12 +76,12 @@ def show(app, navigate):
     vis_place.pack()
 
     # body
-    body = customtkinter.CTkFrame(app,
+    body = customtkinter.CTkFrame(app, bg_color=WHITE,
                                 fg_color="transparent")
     body.pack(fill="both", expand=True, padx=14, pady=(10, 8))
 
     # sidebar
-    sidebar = customtkinter.CTkScrollableFrame(body,
+    sidebar = customtkinter.CTkScrollableFrame(body, bg_color=WHITE,
                                             fg_color=WHITE,
                                             corner_radius=12,
                                             width=186)
@@ -219,7 +219,7 @@ def show(app, navigate):
         op_btns[op] = b
 
     #content
-    content = customtkinter.CTkScrollableFrame(body,
+    content = customtkinter.CTkScrollableFrame(body, bg_color=WHITE,
                                     fg_color=WHITE,
                                     corner_radius=12,
                                     width=420)
@@ -557,7 +557,7 @@ def show(app, navigate):
     btn_iter.pack(side="left")
 
     # resultats
-    result = customtkinter.CTkScrollableFrame(body,
+    result = customtkinter.CTkScrollableFrame(body, bg_color=WHITE,
                                             fg_color=WHITE,
                                             corner_radius=12)
     result.pack(side="right", fill="both", expand=True)

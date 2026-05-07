@@ -16,6 +16,7 @@ def show(app, navigate):
     #create the top
     header = customtkinter.CTkFrame(app, 
                                     fg_color=WHITE, 
+                                    bg_color=WHITE,
                                     corner_radius=0, 
                                     height=54)
     header.pack(fill="x")
@@ -45,13 +46,15 @@ def show(app, navigate):
 
     #frame principale
     body = customtkinter.CTkFrame(app, 
-                                fg_color="transparent"
+                                fg_color="transparent",
+                                bg_color=WHITE
     )
     body.pack(fill="both", expand=False, padx=14, pady=(10, 8))
 
     #frame des algorithmes et opérations
     left_col = customtkinter.CTkScrollableFrame(body, 
-                                    fg_color=WHITE, 
+                                    fg_color=WHITE,
+                                    bg_color=WHITE, 
                                     corner_radius=12, 
                                     width=186)
     left_col.pack(side="left", fill="y", padx=(0, 8))
@@ -183,7 +186,8 @@ def show(app, navigate):
 
     # partie des champs
     saisir = customtkinter.CTkFrame(body, 
-                                    fg_color=WHITE, 
+                                    fg_color=WHITE,
+                                    bg_color=WHITE, 
                                     corner_radius=12, 
                                     width=295
     )
@@ -227,7 +231,7 @@ def show(app, navigate):
                                         text_color=DARK)
 
     #frame pour les deux champs
-    group = customtkinter.CTkFrame(saisir, fg_color="transparent")
+    group = customtkinter.CTkFrame(saisir,bg_color=WHITE, fg_color="transparent")
 
     #a
     a = customtkinter.CTkEntry(group, 
@@ -289,7 +293,7 @@ def show(app, navigate):
     btn_calc.pack(side="bottom", pady=14, padx=16)
 
     #partie resultat 
-    result = customtkinter.CTkFrame(body, 
+    result = customtkinter.CTkFrame(body, bg_color=WHITE,
                                     fg_color=WHITE, 
                                     corner_radius=12)
     result.pack(side="left", fill="both", expand=True)
@@ -393,7 +397,7 @@ def show(app, navigate):
     btn_meth.pack(side="right", pady=10, padx=16)
 
     #partie visaulaisation
-    visualisation = customtkinter.CTkFrame(app, 
+    visualisation = customtkinter.CTkFrame(app, bg_color=WHITE,
                                         fg_color=WHITE, 
                                         corner_radius=12)
     visualisation.pack(fill="both", expand=True, padx=14, pady=(0, 14))
