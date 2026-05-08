@@ -1,312 +1,132 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import messagebox
-
-
-# SAISIE DES DONNEES
-
-x_input = input("Entrer les valeurs de X : ")
-
-# L'utilisateur entre les valeurs de Y séparées par des espaces
-y_input = input("Entrer les valeurs de Y : ")
-
-
-# Transfert str into array 
-X = np.array(list(map(float, x_input.split())))
-Y = np.array(list(map(float, y_input.split())))
-
-
-# nb points nuage 
-n = len(X)
-
-
-#verification donnee inserer 
-
-# X et Y de meme taille
-if len(X) != len(Y):
-    messagebox.showerror(
-        "Erreur",
-        "X et Y doivent avoir le même nombre de valeurs"
-    )
-
-    exit()
-
-
-
-
-S = int(input("Entrer le degré maximal : "))
-
-
-
-# Le degré doit être inférieur au nombre de points
-if S >= n:
-    messagebox.showerror(
-        "Erreur",
-        "le degré doit être inférieur au nombre de points""
-    )
-    exit()
-
-
-
-
-#fonction des moindre carree
-def MC(x, y, s):
-
-
-    #matrice vandermonde
-    V = np.vander(x, s + 1, increasing=True)
-
-    # M = V^T * V
-    M = np.dot(V.T, V)
-
-    # B = V^T * y
-    B = np.dot(V.T, y)
-
-
- #resoulution de sys lineaire M A=B
-    a = np.linalg.solve(M, B)
-
-    return a, M
-
-
-
-# calculer le polynome 
-def affiche_p(a, x):
-
-    resultat = np.zeros_like(x, dtype=float)
-  
-    for i, ai in enumerate(a):
-
-        resultat += ai * x**i
-
-
-    return resultat
-
-
-
-
-def cout(y, y_approx):
-
-    # J = Σ (yi - Pi)^2
-    return np.sum((y - y_approx)**2)
-
-
-
-# ============================================================
-# DICTIONNAIRES POUR STOCKER LES RESULTATS
-# ============================================================
-
-# coefficients des polynômes
-coefficients = {}
-
-# fonctions de coût
-couts = {}
-
-# matrices M
-matrices_M = {}
-
-
-
-# ============================================================
-# CALCUL DE TOUS LES POLYNOMES
-# ============================================================
-
-# Boucle :
-# on calcule tous les polynômes de degré 1 jusqu'à S
-for s in range(1, S + 1):
-
-
-    # --------------------------------------------------------
-    # Calcul des coefficients
-    # --------------------------------------------------------
-    a, M = MC(X, Y, s)
-
-
-    # --------------------------------------------------------
-    # Valeurs approchées
-    # --------------------------------------------------------
-    y_approx = affiche_p(a, X)
-
-
-    # --------------------------------------------------------
-    # Calcul du coût
-    # --------------------------------------------------------
-    J = cout(Y, y_approx)
-
-
-    # --------------------------------------------------------
-    # Sauvegarde des résultats
-    # --------------------------------------------------------
-    coefficients[s] = a
-    couts[s] = J
-    matrices_M[s] = M
-
-
-
-# ============================================================
-# RECHERCHE DU MEILLEUR POLYNOME
-# ============================================================
-
-# min(couts, key=couts.get)
-# retourne la clé correspondant au plus petit coût
-meilleur_degre = min(couts, key=couts.get)
-
-
-# coût minimal
-meilleur_cout = couts[meilleur_degre]
-
-
-# coefficients du meilleur polynôme
-meilleur_polynome = coefficients[meilleur_degre]
-
-
-
-# ============================================================
-# AFFICHAGE DES RESULTATS
-# ============================================================
-
-print("\n================ RESULTATS ================\n")
-
-
-# Affichage des informations pour chaque polynôme
-for s in range(1, S + 1):
-
-    print(f"Polynôme de degré {s}")
-
-    print("Coefficients :")
-    print(coefficients[s])
-
-    print("\nMatrice M :")
-    print(matrices_M[s])
-
-    print(f"\nFonction de coût J = {couts[s]:.6f}")
-
-    print("\n------------------------------------------\n")
-
-
-
-# ============================================================
-# AFFICHAGE DU MEILLEUR POLYNOME
-# ============================================================
-
-print("=========== MEILLEUR POLYNOME ===========")
-
-print(f"Meilleur degré : {meilleur_degre}")
-
-print(f"Coût minimal : {meilleur_cout:.6f}")
-
-print("Coefficients :")
-print(meilleur_polynome)
-
-
-
-# ============================================================
-# PREPARATION DU GRAPHE
-# ============================================================
-
-# Création de plusieurs valeurs de x
-# pour avoir des courbes lisses
-x_plot = np.linspace(min(X) - 0.5,
-                     max(X) + 0.5,
-                     500)
-
-
-
-# ============================================================
-# AFFICHAGE DU GRAPHE GLOBAL
-# ============================================================
-
-# Taille de la fenêtre
-plt.figure(figsize=(10, 7))
-
-
-# ------------------------------------------------------------
-# Affichage du nuage de points
-# ------------------------------------------------------------
-plt.scatter(X,
-            Y,
-            color='black',
-            s=60,
-            zorder=5,
-            label='Nuage de points')
-
-
 import random
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+def lancer_mc_depuis_interface(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame,format_matrix):
+#recuperer donnee
+    try:
+        X_list = []
+        Y_list = []
 
-# Liste de couleurs possibles
-couleurs_possibles = [
-    'blue',
-    'red',
-    'green',
-    'purple',
-    'orange',
-    'brown',
-    'pink',
-    'gray',
-    'cyan',
-    'magenta',
-    'olive',
-    'navy',
-    'gold',
-    'lime'
-]
+        for p in inputs["points"]:
+            X_list.append(float(p["x"]))
+            Y_list.append(float(p["y"]))
 
-# Génération aléatoire des couleurs
-couleurs = random.sample(couleurs_possibles, S)
+        X = np.array(X_list)
+        Y = np.array(Y_list)
+    except:
+        messagebox.showerror("Erreur", "Points invalides")
+        return
 
+    if len(X) < 2:
+        messagebox.showerror("Erreur", "Pas assez de points")
+        return
 
+    try:
+        S = int(inputs["mc_deg"])
+    except:
+        messagebox.showerror("Erreur", "Degré invalide")
+        return
 
-
-
-for s in range(1, S + 1):
-
-    # --------------------------------------------------------
-    # Calcul des valeurs du polynôme
-    # --------------------------------------------------------
-    y_plot = affiche_p(coefficients[s], x_plot)
+    if S >= len(X):
+        messagebox.showerror("Erreur", "Degré trop grand")
+        return
 
 
-    # --------------------------------------------------------
-    # Si c'est le meilleur polynôme
-    # on l'affiche plus épais
-    # --------------------------------------------------------
-    if s == meilleur_degre:
-
-        plt.plot(x_plot,
-                 y_plot,
-                 linewidth=4,
-                 color=couleurs[s % len(couleurs)],
-                 label=f'Meilleur P{s}(x)  -  J={couts[s]:.4f}')
-
-    else:
-
-        plt.plot(x_plot,
-                 y_plot,
-                 linewidth=2,
-                 color=couleurs[s % len(couleurs)],
-                 label=f'P{s}(x)  -  J={couts[s]:.4f}')
-
-
-
-# ============================================================
-# PERSONNALISATION DU GRAPHE
-# ============================================================
-
-plt.title("Approximation polynomiale par la méthode des moindres carrés")
-
-plt.xlabel("x")
-
-plt.ylabel("y")
-
-plt.grid(True, linestyle='--', alpha=0.5)
-
-plt.legend()
+#moindre carree
+    def MC(x, y, s):
+        #matrice vander
+        V = np.vander(x, s + 1, increasing=True)
+        #calc M
+        M = np.dot(V.T , V)
+        #calc B
+        B = np.dot(V.T , y)
+        #coeff  calcul
+        a = np.linalg.solve(M, B)
+        return a, M
+# calcul polynome
+    def poly(a, x):
+        r = np.zeros_like(x, dtype=float)
+        for i, ai in enumerate(a):
+            r += ai * x**i
+        return r
+#calc cout
+    def cout(y, yp):
+        return np.sum((y - yp)**2)
 
 
+    coefficients = {}
+    couts = {}
+    matrices = {}
 
-# ============================================================
-# AFFICHAGE FINAL
-# ============================================================
+    for i in range(1, S + 1):
+        a, M = MC(X, Y, i)
 
-plt.show()
+        ycalc = poly(a, X)
+
+        coefficients[i] = a
+        couts[i] = cout(Y, ycalc)
+        matrices[i] = M
+        #recuperer le poly avec le cout min 
+    best = min(couts, key=couts.get)
+    best_a = coefficients[best]
+    best_J = couts[best]
+    best_M = matrices[best]
+
+
+ #affichage graphe
+    fig = plt.Figure(figsize=(5, 4), dpi=100)
+    ax = fig.add_subplot(111)
+    canvas_frame.figure = fig
+
+    ax.scatter(X, Y, color="black")
+
+    x_plot = np.linspace(min(X)-0.5, max(X)+0.5, 300)
+
+    colors = []
+
+    for i in range(S):
+        r = 0.3 + random.random() * 0.7
+        g = 0.3 + random.random() * 0.7
+        b = 0.3 + random.random() * 0.7
+        colors.append((r, g, b))
+
+    for s in range(1, S + 1):
+        y_plot = poly(coefficients[s], x_plot)
+
+        if s == best:
+            ax.plot(x_plot, y_plot, linewidth=3, label=f"Best P{s}")
+        else:
+            ax.plot(x_plot, y_plot, color=colors[s-1],label=f"P{s}", alpha=0.7)
+
+    ax.legend()
+    ax.grid(True)
+
+    # effacer ancien graphe
+    for widget in canvas_frame.winfo_children():
+        widget.destroy()
+
+    canvas = FigureCanvasTkAgg(fig, master=canvas_frame)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill="both", expand=True)
+
+
+#affiche dans interface 
+    terms = []
+
+    for i in range(len(best_a)):
+        if i == 0:
+            terms.append(f"{best_a[i]:.3f}")
+        else:
+            terms.append(f"{best_a[i]:.3f}x^{i}")
+
+    lbl_poly.configure(
+        text="P(x) = " + " + ".join(terms)
+    )
+
+    lbl_cout.configure(text=f"{best_J:.6f}")
+
+    lbl_matM.configure(
+        text=format_matrix(best_M)
+    )
