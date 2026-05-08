@@ -43,7 +43,7 @@ S = int(input("Entrer le degré maximal : "))
 if S >= n:
     messagebox.showerror(
         "Erreur",
-        "le degré doit être inférieur au nombre de points""
+        "le degré doit être inférieur au nombre de points"
     )
     exit()
 
