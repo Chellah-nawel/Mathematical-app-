@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from sympy import *
 
 # fonction pour calculer la derive ou le gradient

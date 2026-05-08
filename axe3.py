@@ -1,6 +1,10 @@
 import customtkinter
 import tkinter as tk
-
+from tkinter import messagebox, filedialog
+from appropoint import lancer_mc_depuis_interface
+from approdirect import  lancer_mc_continu
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
 def show(app, navigate):
 
     YELLOW     = "#f5c518"
@@ -15,6 +19,20 @@ def show(app, navigate):
     RED_BORDER = "#ffcccc"
     BTN_DEL    = "#e53935"
 
+    def format_matrix(M):
+        rows = []
+
+        for i, row in enumerate(M):
+            formatted = "   ".join(f"{v:8.3f}" for v in row)
+
+            if i == 0:
+                rows.append("[[ " + formatted + " ]")
+            elif i == len(M) - 1:
+                rows.append(" [ " + formatted + " ]]")
+            else:
+                rows.append(" [ " + formatted + " ]")
+
+        return "\n".join(rows)
 
     header_bar = customtkinter.CTkFrame(app, bg_color=WHITE, 
                                         fg_color=WHITE, 
@@ -48,7 +66,8 @@ def show(app, navigate):
                                     fg_color=WHITE, 
                                     corner_radius=12)
     vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
-
+    graph_frame = customtkinter.CTkFrame(vis_outer, fg_color="white")
+    graph_frame.pack(fill="both", expand=True, padx=10, pady=10)
     vis_header = customtkinter.CTkFrame(vis_outer, 
                                         fg_color="transparent")
     vis_header.pack(fill="x", padx=14, pady=(10, 0))
@@ -57,7 +76,21 @@ def show(app, navigate):
                         text="Visualisation",
                         font=customtkinter.CTkFont(size=13, weight="bold"),
                         text_color=DARK).pack(side="left")
+    def on_export():
+        fig = graph_frame.figure
 
+        if not hasattr(graph_frame, "figure"):
+            messagebox.showerror("Erreur", "Aucun graphe à exporter")
+            return
+
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG image", "*.png"), ("PDF file", "*.pdf")]
+        )
+
+        if file_path:
+            fig.savefig(file_path, dpi=300, bbox_inches="tight")
+            messagebox.showinfo("Succès", "Graphe exporté avec succès")
     btn_export = customtkinter.CTkButton(vis_header, 
                                         text="⬇  Exporter résultats",
                                         width=160, 
@@ -68,8 +101,9 @@ def show(app, navigate):
                                         border_width=1, 
                                         border_color=BORDER, 
                                         corner_radius=8,
-                                        font=customtkinter.CTkFont(size=11)
-        # command=on_exporter a faire
+                                        font=customtkinter.CTkFont(size=11),
+                                        command=on_export 
+
     )
     btn_export.pack(side="right")
 
@@ -424,6 +458,7 @@ def show(app, navigate):
 
     #moindre carrees
     mc_frame = customtkinter.CTkFrame(right_col, 
+                                      width=450,
                                     fg_color="transparent")
 
     #discret continue
@@ -556,6 +591,7 @@ def show(app, navigate):
 
     # resultat mc
     frame_resultat_mc= customtkinter.CTkFrame(mc_frame,
+                                              width=400,
                                             fg_color="transparent")
     frame_resultat_mc.pack(anchor="w")
 
@@ -599,12 +635,12 @@ def show(app, navigate):
                         text_color=GREY)
     m_lab.pack(anchor="w")
 
-    lbl_matM = customtkinter.CTkLabel(frame_resultat_mc, 
-                                    text="—",
-                                    font=customtkinter.CTkFont(size=12), 
-                                    text_color=DARK,
-                                    wraplength=260, 
-                                    justify="left")
+    lbl_matM = customtkinter.CTkLabel(frame_resultat_mc,
+                                        text="—",
+                                        font=customtkinter.CTkFont(family="Courier New", size=12, weight="bold"),
+                                        text_color=DARK,
+                                        justify="left"
+    )
     lbl_matM.pack(anchor="w", pady=(2, 10))
 
     def mode_MC():
@@ -748,7 +784,33 @@ def show(app, navigate):
                                         font=customtkinter.CTkFont(size=16, weight="bold"), 
                                         text_color=BTN_DEL)
     lbl_err_grad.pack(anchor="w", pady=(2, 10))
+    #fonction pour decider quoi faire qund il clique sur c=btn calculer 
+    def on_calculer():
 
+        inputs = get_inputs()
+
+        # interpolation / autre logique
+        if current_sel.get() == "Moindres carrés":
+
+            if mc_mode.get() == "discret":
+                lancer_mc_depuis_interface(
+                    inputs,
+                    lbl_poly,
+                    lbl_cout,
+                    lbl_matM,
+                    graph_frame,
+                    format_matrix
+                )
+
+            else:  # CONTINU
+                lancer_mc_continu(
+                    inputs,
+                    lbl_poly,
+                    lbl_cout,
+                    lbl_matM,
+                    graph_frame,
+                    format_matrix
+                )
     #calcule
     btn_calc = customtkinter.CTkButton(right_col, 
                                     text="▶   Calculer",
@@ -758,9 +820,10 @@ def show(app, navigate):
                                     text_color=DARK, 
                                     hover_color=YELLOW_HVR,
                                     font=customtkinter.CTkFont(size=14, weight="bold"), 
-                                    corner_radius=10
-        # command=on_calculer a faire
-    )
+                                    corner_radius=10,
+                                    command=on_calculer
+)
+        
     btn_calc.pack(padx=16, pady=(10, 14))
 
     f= customtkinter.CTkFrame(right_col, 
