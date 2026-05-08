@@ -5,6 +5,9 @@ from appropoint import lancer_mc_depuis_interface
 from approdirect import  lancer_mc_continu
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+from algo_descente_gradient import gradient_descent
+from sympy import symbols, sympify
+
 def show(app, navigate):
 
     YELLOW     = "#f5c518"
@@ -66,7 +69,9 @@ def show(app, navigate):
                                     fg_color=WHITE, 
                                     corner_radius=12)
     vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
+
     graph_frame = customtkinter.CTkFrame(vis_outer, fg_color="white")
+
     graph_frame.pack(fill="both", expand=True, padx=10, pady=10)
     vis_header = customtkinter.CTkFrame(vis_outer, 
                                         fg_color="transparent")
@@ -657,7 +662,7 @@ def show(app, navigate):
 
     # fonction
     dg_func= customtkinter.CTkLabel(grad_frame, 
-                        text="Définir f(x)",
+                        text="Définir f(x,y,...)",
                         font=customtkinter.CTkFont(size=12), 
                         text_color=DARK)
     dg_func.pack(anchor="w")
@@ -671,7 +676,7 @@ def show(app, navigate):
                                             fg_color=WHITE, 
                                             text_color=DARK,
                                             font=customtkinter.CTkFont(size=12), 
-                                            placeholder_text="ex: x**2 - 3*x + 2")
+                                            placeholder_text="ex: x**2 - 3*y + 2")
     grad_func_input.pack(anchor="w", pady=(4, 0))
 
     #les inputs
@@ -685,7 +690,7 @@ def show(app, navigate):
     grad_x0_col.pack(side="left", padx=(0, 12))
 
     x0_lab= customtkinter.CTkLabel(grad_x0_col, 
-                        text="x0 initial",
+                        text="Valeurs Initiales",
                         font=customtkinter.CTkFont(size=12), 
                         text_color=DARK)
     x0_lab.pack(anchor="w")
@@ -699,7 +704,7 @@ def show(app, navigate):
                                         fg_color=WHITE, 
                                         text_color=DARK,
                                         font=customtkinter.CTkFont(size=12), 
-                                        placeholder_text="ex: 0")
+                                        placeholder_text="ex: 0, 1,...")
     grad_x0_input.pack(pady=(4, 0))
 
     sepV= customtkinter.CTkFrame(grad_row1, 
@@ -784,14 +789,20 @@ def show(app, navigate):
                                         font=customtkinter.CTkFont(size=16, weight="bold"), 
                                         text_color=BTN_DEL)
     lbl_err_grad.pack(anchor="w", pady=(2, 10))
+    #recuperation des input de dg
+    def get_input_gd():
+        return [
+            grad_func_input.get(),
+            grad_x0_input.get(),
+            grad_pas_input.get(),
+            gd_tol_input.get()
+        ]
+
     #fonction pour decider quoi faire qund il clique sur c=btn calculer 
     def on_calculer():
-
-        inputs = get_inputs()
-
-        # interpolation / autre logique
+        # interpolation ou approximation
         if current_sel.get() == "Moindres carrés":
-
+            inputs = get_inputs()
             if mc_mode.get() == "discret":
                 lancer_mc_depuis_interface(
                     inputs,
@@ -802,15 +813,31 @@ def show(app, navigate):
                     format_matrix
                 )
 
-            else:  # CONTINU
-                lancer_mc_continu(
-                    inputs,
-                    lbl_poly,
-                    lbl_cout,
-                    lbl_matM,
-                    graph_frame,
-                    format_matrix
-                )
+            else:  # continu
+                lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, graph_frame, format_matrix )
+
+        elif current_sel.get() == "Descente de gradient":
+            f_str, x0_str, alpha_str, tol_str = get_input_gd()
+
+            # fonction
+            f = sympify(f_str)
+
+            # variables automatiques (approx simple)
+            variables = sorted(list(f.free_symbols), key=lambda s: s.name)
+
+            # conversion les inputs
+            start = list(map(float, x0_str.split(",")))
+            alpha = float(alpha_str)
+            tolerance = float(tol_str)
+
+            #appliquer l'algo 
+            x, erreur = gradient_descent(f, variables, start, alpha, tolerance)
+
+            #afficher les resultats
+            lab_min.configure(text=str(x))
+            lbl_err_grad.configure(text=str(erreur))
+
+
     #calcule
     btn_calc = customtkinter.CTkButton(right_col, 
                                     text="▶   Calculer",
@@ -822,7 +849,7 @@ def show(app, navigate):
                                     font=customtkinter.CTkFont(size=14, weight="bold"), 
                                     corner_radius=10,
                                     command=on_calculer
-)
+    )
         
     btn_calc.pack(padx=16, pady=(10, 14))
 
@@ -899,6 +926,7 @@ def show(app, navigate):
         elif name == "Descente de gradient":
             grad_frame.pack(anchor="w", padx=16, pady=(0, 8))
             pnt_fram.pack_forget()
+            vis_outer.pack_forget()
 
 
     def get_inputs():
