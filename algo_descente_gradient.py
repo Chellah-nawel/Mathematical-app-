@@ -4,7 +4,7 @@ from sympy import *
 # fonction pour calculer la derive ou le gradient
 def gradient(f, variables):
     result=[]
-    for i in range(variables):
+    for i in variables:
         derive= diff(f,i)
         result.append(derive)
 
@@ -19,8 +19,8 @@ def gradient_descent(f, variables, start, alpha, tolerance):
 
     # convertir f en fct numerique 
     grad_func = []
-    for i in grad:
-        grad_func.append(lambdify(variables, i))
+    for j in grad:
+        grad_func.append(lambdify(variables, j))
 
     # les x0
     x = np.array(start, dtype=float)
@@ -29,18 +29,19 @@ def gradient_descent(f, variables, start, alpha, tolerance):
 
         # valeur du gradient au point actuel
         grad_value = []
-        for i in grad_func:
-            grad_value.append(i(*x)) # * pour depiler le tableau
+        for k in grad_func:
+            grad_value.append(k(*x)) # * pour depiler le tableau
 
         grad_value = np.array(grad_value, dtype=float)
 
         xn = x - alpha * grad_value
 
         #condition d'arret
-        if np.linalg.norm(xn - x) < tolerance:
+        erreur = np.linalg.norm(xn - x)
+        if erreur < tolerance:
             break
 
         x=xn
         i+=1
 
-    return x
+    return x, erreur
