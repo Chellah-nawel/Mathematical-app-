@@ -1,5 +1,12 @@
 import customtkinter
 import tkinter as tk
+from tkinter import messagebox, filedialog
+from appropoint import lancer_mc_depuis_interface
+from approdirect import  lancer_mc_continu
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+from algo_descente_gradient import gradient_descent
+from sympy import symbols, sympify
 
 def show(app, navigate):
 
@@ -15,6 +22,20 @@ def show(app, navigate):
     RED_BORDER = "#ffcccc"
     BTN_DEL    = "#e53935"
 
+    def format_matrix(M):
+        rows = []
+
+        for i, row in enumerate(M):
+            formatted = "   ".join(f"{v:8.3f}" for v in row)
+
+            if i == 0:
+                rows.append("[[ " + formatted + " ]")
+            elif i == len(M) - 1:
+                rows.append(" [ " + formatted + " ]]")
+            else:
+                rows.append(" [ " + formatted + " ]")
+
+        return "\n".join(rows)
 
     header_bar = customtkinter.CTkFrame(app, bg_color=WHITE, 
                                         fg_color=WHITE, 
@@ -49,6 +70,9 @@ def show(app, navigate):
                                     corner_radius=12)
     vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
 
+    graph_frame = customtkinter.CTkFrame(vis_outer, fg_color="white")
+
+    graph_frame.pack(fill="both", expand=True, padx=10, pady=10)
     vis_header = customtkinter.CTkFrame(vis_outer, 
                                         fg_color="transparent")
     vis_header.pack(fill="x", padx=14, pady=(10, 0))
@@ -57,7 +81,21 @@ def show(app, navigate):
                         text="Visualisation",
                         font=customtkinter.CTkFont(size=13, weight="bold"),
                         text_color=DARK).pack(side="left")
+    def on_export():
+        fig = graph_frame.figure
 
+        if not hasattr(graph_frame, "figure"):
+            messagebox.showerror("Erreur", "Aucun graphe à exporter")
+            return
+
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG image", "*.png"), ("PDF file", "*.pdf")]
+        )
+
+        if file_path:
+            fig.savefig(file_path, dpi=300, bbox_inches="tight")
+            messagebox.showinfo("Succès", "Graphe exporté avec succès")
     btn_export = customtkinter.CTkButton(vis_header, 
                                         text="⬇  Exporter résultats",
                                         width=160, 
@@ -68,8 +106,9 @@ def show(app, navigate):
                                         border_width=1, 
                                         border_color=BORDER, 
                                         corner_radius=8,
-                                        font=customtkinter.CTkFont(size=11)
-        # command=on_exporter a faire
+                                        font=customtkinter.CTkFont(size=11),
+                                        command=on_export 
+
     )
     btn_export.pack(side="right")
 
@@ -424,6 +463,7 @@ def show(app, navigate):
 
     #moindre carrees
     mc_frame = customtkinter.CTkFrame(right_col, 
+                                      width=450,
                                     fg_color="transparent")
 
     #discret continue
@@ -556,6 +596,7 @@ def show(app, navigate):
 
     # resultat mc
     frame_resultat_mc= customtkinter.CTkFrame(mc_frame,
+                                              width=400,
                                             fg_color="transparent")
     frame_resultat_mc.pack(anchor="w")
 
@@ -599,12 +640,12 @@ def show(app, navigate):
                         text_color=GREY)
     m_lab.pack(anchor="w")
 
-    lbl_matM = customtkinter.CTkLabel(frame_resultat_mc, 
-                                    text="—",
-                                    font=customtkinter.CTkFont(size=12), 
-                                    text_color=DARK,
-                                    wraplength=260, 
-                                    justify="left")
+    lbl_matM = customtkinter.CTkLabel(frame_resultat_mc,
+                                        text="—",
+                                        font=customtkinter.CTkFont(family="Courier New", size=12, weight="bold"),
+                                        text_color=DARK,
+                                        justify="left"
+    )
     lbl_matM.pack(anchor="w", pady=(2, 10))
 
     def mode_MC():
@@ -621,7 +662,7 @@ def show(app, navigate):
 
     # fonction
     dg_func= customtkinter.CTkLabel(grad_frame, 
-                        text="Définir f(x)",
+                        text="Définir f(x,y,...)",
                         font=customtkinter.CTkFont(size=12), 
                         text_color=DARK)
     dg_func.pack(anchor="w")
@@ -635,7 +676,7 @@ def show(app, navigate):
                                             fg_color=WHITE, 
                                             text_color=DARK,
                                             font=customtkinter.CTkFont(size=12), 
-                                            placeholder_text="ex: x**2 - 3*x + 2")
+                                            placeholder_text="ex: x**2 - 3*y + 2")
     grad_func_input.pack(anchor="w", pady=(4, 0))
 
     #les inputs
@@ -649,7 +690,7 @@ def show(app, navigate):
     grad_x0_col.pack(side="left", padx=(0, 12))
 
     x0_lab= customtkinter.CTkLabel(grad_x0_col, 
-                        text="x0 initial",
+                        text="Valeurs Initiales",
                         font=customtkinter.CTkFont(size=12), 
                         text_color=DARK)
     x0_lab.pack(anchor="w")
@@ -663,7 +704,7 @@ def show(app, navigate):
                                         fg_color=WHITE, 
                                         text_color=DARK,
                                         font=customtkinter.CTkFont(size=12), 
-                                        placeholder_text="ex: 0")
+                                        placeholder_text="ex: 0, 1,...")
     grad_x0_input.pack(pady=(4, 0))
 
     sepV= customtkinter.CTkFrame(grad_row1, 
@@ -748,6 +789,54 @@ def show(app, navigate):
                                         font=customtkinter.CTkFont(size=16, weight="bold"), 
                                         text_color=BTN_DEL)
     lbl_err_grad.pack(anchor="w", pady=(2, 10))
+    #recuperation des input de dg
+    def get_input_gd():
+        return [
+            grad_func_input.get(),
+            grad_x0_input.get(),
+            grad_pas_input.get(),
+            gd_tol_input.get()
+        ]
+
+    #fonction pour decider quoi faire qund il clique sur c=btn calculer 
+    def on_calculer():
+        # interpolation ou approximation
+        if current_sel.get() == "Moindres carrés":
+            inputs = get_inputs()
+            if mc_mode.get() == "discret":
+                lancer_mc_depuis_interface(
+                    inputs,
+                    lbl_poly,
+                    lbl_cout,
+                    lbl_matM,
+                    graph_frame,
+                    format_matrix
+                )
+
+            else:  # continu
+                lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, graph_frame, format_matrix )
+
+        elif current_sel.get() == "Descente de gradient":
+            f_str, x0_str, alpha_str, tol_str = get_input_gd()
+
+            # fonction
+            f = sympify(f_str)
+
+            # variables automatiques (approx simple)
+            variables = sorted(list(f.free_symbols), key=lambda s: s.name)
+
+            # conversion les inputs
+            start = list(map(float, x0_str.split(",")))
+            alpha = float(alpha_str)
+            tolerance = float(tol_str)
+
+            #appliquer l'algo 
+            x, erreur = gradient_descent(f, variables, start, alpha, tolerance)
+
+            #afficher les resultats
+            lab_min.configure(text=str(x))
+            lbl_err_grad.configure(text=str(erreur))
+
 
     #calcule
     btn_calc = customtkinter.CTkButton(right_col, 
@@ -758,9 +847,10 @@ def show(app, navigate):
                                     text_color=DARK, 
                                     hover_color=YELLOW_HVR,
                                     font=customtkinter.CTkFont(size=14, weight="bold"), 
-                                    corner_radius=10
-        # command=on_calculer a faire
+                                    corner_radius=10,
+                                    command=on_calculer
     )
+        
     btn_calc.pack(padx=16, pady=(10, 14))
 
     f= customtkinter.CTkFrame(right_col, 
@@ -836,6 +926,7 @@ def show(app, navigate):
         elif name == "Descente de gradient":
             grad_frame.pack(anchor="w", padx=16, pady=(0, 8))
             pnt_fram.pack_forget()
+            vis_outer.pack_forget()
 
 
     def get_inputs():
