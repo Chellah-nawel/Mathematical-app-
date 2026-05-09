@@ -115,10 +115,3 @@ def display_poly(x, y ,n):
     poly_str = poly_str.replace("+ -", "- ")   # fix "+ -3x" → "- 3x"
 
     return poly_str
-
-"""
-x = [1, 2, 3]
-y = [3, 1, 4]
-
-e,p=poly_lagrange(x, y)
-print(p)"""
