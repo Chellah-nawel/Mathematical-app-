@@ -16,10 +16,7 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
             raise ValueError
 
     except:
-        messagebox.showerror(
-            "Erreur",
-            "Fonction invalide"
-        )
+        messagebox.showerror( "Erreur","Fonction invalide")
         return
 
     try:
@@ -27,34 +24,22 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
         b = float(inputs["mc_b"])
 
     except:
-        messagebox.showerror(
-            "Erreur",
-            "Intervalle invalide"
-        )
+        messagebox.showerror("Erreur","Intervalle invalide")
         return
 
     if a >= b:
-        messagebox.showerror(
-            "Erreur",
-            "Il faut que a < b"
-        )
+        messagebox.showerror("Erreur","Il faut que a < b")
         return
 
     try:
         S = int(inputs["mc_deg"])
 
     except:
-        messagebox.showerror(
-            "Erreur",
-            "Degré invalide"
-        )
+        messagebox.showerror("Erreur","Degré invalide")
         return
 
     if S < 0:
-        messagebox.showerror(
-            "Erreur",
-            "Le degré doit être positif"
-        )
+        messagebox.showerror("Erreur","Le degré doit être positif" )
         return
 
 
@@ -67,10 +52,7 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
         f = sp.lambdify(x, expr, modules=["numpy"])
 
     except:
-        messagebox.showerror(
-            "Erreur",
-            "Fonction mathématique invalide"
-        )
+        messagebox.showerror("Erreur","Fonction mathématique invalide")
         return
 
 
@@ -103,7 +85,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
         # vecteur d
         d = np.zeros(s + 1)
         for i in range(s + 1):
-
         # afin de calculer l integrale
             d[i], _ = integrate.quad(lambda t: f(t) * (t ** i),a,b)
 
@@ -124,8 +105,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
         coefficients[s] = a_coef
         couts[s] = J
         matrices[s] = M
-
-
 
     #best poly
     best = min(couts, key=couts.get)
@@ -173,26 +152,18 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
     fig = plt.Figure(figsize=(5, 4), dpi=100)
 
     ax = fig.add_subplot(111)
-
     # sauvegarde pour exportation
     canvas_frame.figure = fig
 
 
 #creation points
-
     x_plot = np.linspace(a, b, 400)
 
 
 #fonction
     y_f = f(x_plot)
 
-    ax.plot(
-        x_plot,
-        y_f,
-        color="black",
-        linewidth=3,
-        label="f(x)"
-    )
+    ax.plot(x_plot,y_f,color="black",linewidth=3,label="f(x)")
 
 
     colors = []
@@ -211,31 +182,17 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
     for s in range(S + 1):
 
         # calcul du polynome
-        y_plot = poly(
-            coefficients[s],
-            x_plot
-        )
+        y_plot = poly(coefficients[s],x_plot)
 
         # meilleur polynome
         if s == best:
 
-            ax.plot(
-                x_plot,
-                y_plot,
-                linewidth=3,
-                label=f"Best P{s}"
-            )
+            ax.plot(x_plot,y_plot,linewidth=3,label=f"Best P{s}")
 
         # autres polynomes
         else:
 
-            ax.plot(
-                x_plot,
-                y_plot,
-                color=colors[s],
-                alpha=0.7,
-                label=f"P{s}"
-            )
+            ax.plot(x_plot,y_plot,color=colors[s],alpha=0.7,label=f"P{s}")
 
 
     ax.grid(True)
