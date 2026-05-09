@@ -1,10 +1,24 @@
 import customtkinter
 import tkinter as tk
+from tkinter import *
+from tools import *
+from algo_dichotomie import *
+from algo_newtonR import *
+from algo_pt_fixe import *
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from PIL import Image, ImageTk
+import numpy as np
+import threading
+import os
+
+#to store figures and tables
+if not os.path.exists("Resultat"):
+        os.makedirs("Resultat")
+
 def show(app, navigate):
-    #identifier la palette de couleurs utilisée dans l'application
     YELLOW     = "#f5c518"
     YELLOW_HVR = "#e6b800"
-    LIGHT_BG   = "#f4f6f9"
     WHITE      = "#ffffff"
     DARK       = "#0d1b2e"
     GREY       = "#777777"
@@ -12,502 +26,868 @@ def show(app, navigate):
     BORDER     = "#e0e0e0"
     TIP_BG     = "#fffde7"
     TIP_BORDER = "#f5e600"
+    RED        = "#e03030"
 
-    #create the top
-    header = customtkinter.CTkFrame(app, 
-                                    fg_color=WHITE, 
-                                    bg_color=WHITE,
-                                    corner_radius=0, 
-                                    height=54)
+    last_row    = []
+    last_fig    = [None]
+    last_racine = [None]
+    last_graph_path = [None]
+    last_table_path = [None]
+
+    # ── header ────────────────────────────────────────────────────
+    header = customtkinter.CTkFrame(app, fg_color=WHITE, bg_color=WHITE,corner_radius=0, height=54)
     header.pack(fill="x")
     header.pack_propagate(False)
 
-    #btn retour
-    retour= customtkinter.CTkButton( header, 
-                            text="←", 
-                            width=38, 
-                            height=38,
-                            fg_color="transparent", 
-                            text_color=DARK, 
+    customtkinter.CTkButton(header, text="←", width=38, height=38,
+                            fg_color="transparent", text_color=DARK,
                             hover_color="#f0f0f0",
-                            font=customtkinter.CTkFont(size=20), 
-                            corner_radius=8
-    )
-    retour.configure(command=lambda: navigate("accueil"))
-    retour.pack(side="left", padx=(12, 6), pady=8)
+                            font=customtkinter.CTkFont(size=20),corner_radius=8,
+                            command=lambda: navigate("accueil")).pack(side="left", padx=(12,6), pady=8)
 
-    #title
-    title= customtkinter.CTkLabel(header, 
-                        text="Axe 1 : Fonctions non linéaires",
-                            font=customtkinter.CTkFont(size=17, weight="bold"), 
-                            text_color=DARK
-    )
-    title.pack(side="left")
+    customtkinter.CTkLabel(header,text="Axe 1 : Fonctions non linéaires",
+                           font=customtkinter.CTkFont(size=17, weight="bold"),text_color=DARK).pack(side="left")
 
-    #frame principale
-    body = customtkinter.CTkFrame(app, 
-                                fg_color="transparent",
-                                bg_color=WHITE
-    )
-    body.pack(fill="both", expand=False, padx=14, pady=(10, 8))
+    # ── body (upper section, taller) ──────────────────────────────
+    body = customtkinter.CTkFrame(app, fg_color="transparent", bg_color=WHITE,height=440)
+    body.pack(fill="x", expand=False, padx=14, pady=(10,8))
+    body.pack_propagate(False)
 
-    #frame des algorithmes et opérations
-    left_col = customtkinter.CTkScrollableFrame(body, 
+    # ── colonne gauche ────────────────────────────────────────────
+    left_col = customtkinter.CTkFrame(
+        body,fg_color=WHITE,bg_color=WHITE,
+        corner_radius=12,width=190
+    )
+
+    left_col.pack(side="left", fill="y", padx=(0,8))
+    left_col.pack_propagate(False)
+
+    customtkinter.CTkLabel(left_col, text="Algorithmes",
+                           font=customtkinter.CTkFont(size=13, weight="bold"),
+                           text_color=DARK).pack(anchor="w", padx=14,pady=(14,6))
+
+    algo_btns = {}
+    op_btns   = {}
+    current_sel  = tk.StringVar(value="")
+    current_mode = tk.StringVar(value="algo")
+
+    # ── saisir ────────────────────────────────────────────────────
+    saisir = customtkinter.CTkFrame(body, fg_color=WHITE, bg_color=WHITE,corner_radius=12, width=295)
+    saisir.pack(side="left", fill="y", padx=(0,8))
+    saisir.pack_propagate(False)
+
+    customtkinter.CTkLabel(saisir, text="Paramètres",font=customtkinter.CTkFont(size=15, weight="bold"),
+                           text_color=DARK).pack(anchor="w", padx=16, pady=(14,8))
+
+    customtkinter.CTkLabel(saisir, text="Définir f(x)",
+                           font=customtkinter.CTkFont(size=13),
+                           text_color=DARK).pack(anchor="w", padx=16)
+
+    inputf = customtkinter.CTkEntry(saisir, width=263, height=36,
+                                    corner_radius=8, border_color=BORDER,
+                                    border_width=1, text_color=DARK,
                                     fg_color=WHITE,
-                                    bg_color=WHITE, 
-                                    corner_radius=12, 
-                                    width=186)
-    left_col.pack(side="left", fill="y", padx=(0, 8))
+                                    font=customtkinter.CTkFont(size=12),
+                                    placeholder_text="ex: x**3 - 2*x - 5")
+    inputf.pack(padx=16, pady=(3,10))
 
-    #les titres
-    title_algo= customtkinter.CTkLabel(left_col, 
-                                    text="Algorithmes",
-                                        font=customtkinter.CTkFont(size=13, weight="bold"),
-                                        text_color=DARK
-    )
-    title_algo.pack(anchor="w", padx=14, pady=(14, 6))
+    # widgets cachés
+    lbl_phi   = customtkinter.CTkLabel(saisir, text="Fonction phi(x)",
+                                       font=customtkinter.CTkFont(size=13),
+                                       text_color=DARK)
+    input_phi = customtkinter.CTkEntry(saisir, width=263, height=36,
+                                       corner_radius=8, border_color=BORDER,
+                                       border_width=1, fg_color=WHITE,
+                                       text_color=DARK,
+                                       font=customtkinter.CTkFont(size=12),
+                                       placeholder_text="ex: x/2 + 1/x")
 
-    #declarer les variables a utiliser
-    algo_btns    = {} # il sert a garder une reference vers les boutons algo pour pouvoir les mettre a jour lors de la selection
-    op_btns      = {}
-    current_sel  = tk.StringVar() #il contient l'algo ou l'pt selectionne
-    current_mode = tk.StringVar(value="algo")  #algo pour les algos, op pour les operations 
+    lbl_x0   = customtkinter.CTkLabel(saisir, text="Point de départ x0",
+                                      font=customtkinter.CTkFont(size=13),
+                                      text_color=DARK)
+    input_x0 = customtkinter.CTkEntry(saisir, width=263, height=36,
+                                      corner_radius=8, border_color=BORDER,
+                                      border_width=1, fg_color=WHITE,
+                                      text_color=DARK,
+                                      font=customtkinter.CTkFont(size=12),
+                                      placeholder_text="ex: 1.5")
 
-    #algo pour manipulation des btn
-    #si on click sur un btn d'une algo 
+    lbl_interval = customtkinter.CTkLabel(saisir, text="Intervalle [a, b]",
+                                          font=customtkinter.CTkFont(size=13),
+                                          text_color=DARK)
+    group   = customtkinter.CTkFrame(saisir, bg_color=WHITE,
+                                     fg_color="transparent")
+    a_entry = customtkinter.CTkEntry(group, placeholder_text="a",
+                                     width=124, height=36, corner_radius=8,
+                                     border_color=BORDER, text_color=DARK,
+                                     fg_color=WHITE, border_width=1,
+                                     font=customtkinter.CTkFont(size=12))
+    b_entry = customtkinter.CTkEntry(group, placeholder_text="b",
+                                     width=124, height=36, corner_radius=8,
+                                     border_color=BORDER, text_color=DARK,
+                                     fg_color=WHITE, border_width=1,
+                                     font=customtkinter.CTkFont(size=12))
+    a_entry.pack(side="left", padx=(0,6))
+    b_entry.pack(side="left")
+
+    # Tolérance en slider seul
+    toler = customtkinter.CTkLabel(saisir, text="Tolérance",
+                                    font=customtkinter.CTkFont(size=13),text_color=DARK)
+    lbl_tol_val = customtkinter.CTkLabel(saisir, text="10⁻⁶",
+                                        font=customtkinter.CTkFont(size=11),text_color=GREY)
+    tol_slider  = customtkinter.CTkSlider(saisir, from_=1, to=10, width=263,
+                                           number_of_steps=9)
+    tol_value = [1e-6]   # stocke la valeur courante
+
+    def on_tol_slider(val):
+        exp = int(val)
+        tol_value[0] = 10**(-exp)
+        lbl_tol_val.configure(text=f"10⁻{exp}")
+
+    tol_slider.set(6)
+    tol_slider.configure(command=on_tol_slider)
+
+    # message erreur
+    lbl_err = customtkinter.CTkLabel(saisir, text="",
+                                      font=customtkinter.CTkFont(size=11),
+                                      text_color=RED, wraplength=263)
+    lbl_err.pack(anchor="w", padx=16)
+
+    # ── helpers UI ────────────────────────────────────────────────
+    def show_err(msg):
+        lbl_err.configure(text=msg)
+        app.after(4000, lambda: lbl_err.configure(text=""))
+
+    def update_inputs(name):
+        mode = current_mode.get()
+        for w in [lbl_interval, group, toler, lbl_tol_val, tol_slider,
+                  lbl_phi, input_phi, lbl_x0, input_x0]:
+            w.pack_forget()
+
+        if mode == "algo":
+            if name == "Dichotomie":
+                lbl_interval.pack(anchor="w", padx=16)
+                group.pack(padx=16, pady=(3,10))
+                toler.pack(anchor="w", padx=16)
+                tol_slider.pack(padx=16, pady=(3,2))
+                lbl_tol_val.pack(anchor="e", padx=16)
+
+            elif name == "Newton":
+                lbl_interval.pack(anchor="w", padx=16)
+                group.pack(padx=16, pady=(3,10))
+                lbl_x0.pack(anchor="w", padx=16)
+                input_x0.pack(padx=16, pady=(3,10))
+                toler.pack(anchor="w", padx=16)
+                tol_slider.pack(padx=16, pady=(3,2))
+                lbl_tol_val.pack(anchor="e", padx=16)
+
+            elif name == "Point fixe":
+                lbl_phi.pack(anchor="w", padx=16)
+                input_phi.pack(padx=16, pady=(3,10))
+                lbl_x0.pack(anchor="w", padx=16)
+                input_x0.pack(padx=16, pady=(3,10))
+                toler.pack(anchor="w", padx=16)
+                tol_slider.pack(padx=16, pady=(3,2))
+                lbl_tol_val.pack(anchor="e", padx=16)
+
+        elif mode == "op":
+            if name in ["Continuité", "Table de variation", "Signe de f(x)"]:
+                lbl_interval.pack(anchor="w", padx=16)
+                group.pack(padx=16, pady=(3,10))
+
+    def update_mode_ui():
+        mode = current_mode.get()
+        if mode == "algo":
+            visualisation.pack(fill="both", expand=True, padx=14, pady=(0,14))
+            result.pack(side="left", fill="both", expand=True)
+            resultat.pack_forget()
+        elif mode == "op":
+            visualisation.pack_forget()
+            result.pack_forget()
+            resultat.pack(side="left", fill="both", expand=True)
+
     def refresh_algo_btns():
         sel = current_sel.get()
         for name, btn in algo_btns.items():
-            active = (name == sel)
-            if active:
-                btn.configure(fg_color=YELLOW,
-                            border_width=0,
-                            font=customtkinter.CTkFont(size=15, weight="bold")
-                )
+            if name == sel:
+                btn.configure(fg_color=YELLOW, border_width=0,
+                              font=customtkinter.CTkFont(size=14, weight="bold"))
             else:
-                btn.configure(fg_color=WHITE,
-                            font=customtkinter.CTkFont(size=13, weight="normal")
-                )
+                btn.configure(fg_color=WHITE, border_width=1,
+                              font=customtkinter.CTkFont(size=13, weight="normal"))
         for btn in op_btns.values():
             btn.configure(fg_color=WHITE,
-                        font=customtkinter.CTkFont(size=12, weight="normal"))
+                          font=customtkinter.CTkFont(size=12, weight="normal"))
 
-    #si on click sur une opt
     def refresh_op_btns():
         sel = current_sel.get()
         for name, btn in op_btns.items():
-            active = (name == sel)
-            if active:
+            if name == sel:
                 btn.configure(fg_color=YELLOW,
-                            font=customtkinter.CTkFont(size=15, weight="bold")
-                )
+                              font=customtkinter.CTkFont(size=14, weight="bold"))
             else:
                 btn.configure(fg_color=WHITE,
-                            font=customtkinter.CTkFont(size=13, weight="normal")
-                )
+                              font=customtkinter.CTkFont(size=13, weight="normal"))
+        for btn in algo_btns.values():
+            btn.configure(fg_color=WHITE, border_width=1,
+                          font=customtkinter.CTkFont(size=13, weight="normal"))
 
-        for btn in algo_btns.values(): # on fait aussi le refresh des boutons algo pour enlever la selection si on vient de cliquer sur une op
-            btn.configure(fg_color=WHITE, 
-                        border_width=1,
-                        font=customtkinter.CTkFont(size=13, weight="normal")
-            )   
-
-    #on fait une seule fonction qui regroupe tous
     def select_algo(name):
-        current_sel.set(name) 
+        current_sel.set(name)
         current_mode.set("algo")
         refresh_algo_btns()
         update_inputs(name)
         update_mode_ui()
-        #il y aura d'autres fonctions ca depend la logique
+        lbl_racine.configure(text="—")
+        lbl_iters.configure(text="—")
+        lbl_frac.configure(text="—")
+        lbl_saved.configure(text="")
+        last_racine[0] = None
+        last_row.clear()
+        last_graph_path[0] = None
+        last_table_path[0] = None
+        _update_reco(name)
+        # clear canvas
+        for w in canvas_frame.winfo_children():
+            w.destroy()
+        customtkinter.CTkLabel(canvas_frame,
+                               text="Le graphe apparaîtra ici après le calcul.",
+                               font=customtkinter.CTkFont(size=12),
+                               text_color=GREY).pack(expand=True)
 
-    #creation des bouttons pour les algorithmes
-    for algo in ["Dichotomie", "Newton", "Point fixe"]:
-        b = customtkinter.CTkButton(left_col, 
-                                    text=algo, 
-                                    width=158, 
-                                    height=38,
-                                    fg_color= WHITE,
-                                    text_color=DARK, 
-                                    hover_color=YELLOW_HVR,
-                                    anchor="w", 
-                                    corner_radius=8,
-                                    border_width=1,
-                                    border_color=BORDER,
-                                    font=customtkinter.CTkFont(size=13, weight="normal"),
-            command= lambda n= algo: select_algo(n)
-        )
-        b.pack(padx=14, pady=3)
-        algo_btns[algo] = b #on les ajoute dans la liste des btn
-
-    #separateur
-    sep= customtkinter.CTkFrame(left_col, 
-                                height=1, 
-                                fg_color=BORDER)
-
-    sep.pack(fill="x", padx=14, pady=(12, 10))
-
-    #section des options
-    title_opt= customtkinter.CTkLabel(left_col, 
-                                    text="Opérations sur\nles fonctions",
-                                    font=customtkinter.CTkFont(size=13, weight="bold"),
-                                    text_color=DARK, 
-                                    justify="left"
-    )
-    title_opt.pack(anchor="w", padx=14, pady=(0, 6))
-
-    #pour options
     def select_op(name):
         current_sel.set(name)
         current_mode.set("op")
         refresh_op_btns()
         update_mode_ui()
         update_inputs(name)
-        # on ajoute d'atres fonctions
 
-    #options
+    # ── boutons algo ──────────────────────────────────────────────
+    for algo in ["Dichotomie", "Newton", "Point fixe"]:
+        btn = customtkinter.CTkButton(left_col, text=algo, width=158,
+                                      height=38, fg_color=WHITE,
+                                      text_color=DARK, hover_color=YELLOW_HVR,
+                                      anchor="w", corner_radius=8,
+                                      border_width=1, border_color=BORDER,
+                                      font=customtkinter.CTkFont(size=13),
+                                      command=lambda n=algo: select_algo(n))
+        btn.pack(padx=14, pady=3)
+        algo_btns[algo] = btn
+
+    customtkinter.CTkFrame(left_col, height=1,
+                           fg_color=BORDER).pack(fill="x", padx=14, pady=(12,10))
+
+    customtkinter.CTkLabel(left_col, text="Opérations sur\nles fonctions",
+                           font=customtkinter.CTkFont(size=13, weight="bold"),
+                           text_color=DARK,
+                           justify="left").pack(anchor="w", padx=14, pady=(0,6))
+
     for op in ["Dérivée", "Continuité", "Table de variation", "Signe de f(x)"]:
-        b = customtkinter.CTkButton(left_col, 
-                                    text=op, 
-                                    width=158, 
-                                    height=34,
-                                    fg_color=WHITE, 
-                                    text_color=DARK, 
-                                    hover_color=YELLOW_HVR,
-                                    anchor="w", 
-                                    corner_radius=8,
-                                    border_width=1, 
-                                    border_color=BORDER,
-                                    font=customtkinter.CTkFont(size=13),
-                                    command=lambda n=op: select_op(n)
-        )
-        b.pack(padx=14, pady=3)
-        op_btns[op] = b
+        btn = customtkinter.CTkButton(left_col, text=op, width=158, height=34,
+                                      fg_color=WHITE, text_color=DARK,
+                                      hover_color=YELLOW_HVR, anchor="w",
+                                      corner_radius=8, border_width=1,
+                                      border_color=BORDER,
+                                      font=customtkinter.CTkFont(size=13),
+                                      command=lambda n=op: select_op(n))
+        btn.pack(padx=14, pady=3)
+        op_btns[op] = btn
 
-    # partie des champs
-    saisir = customtkinter.CTkFrame(body, 
-                                    fg_color=WHITE,
-                                    bg_color=WHITE, 
-                                    corner_radius=12, 
-                                    width=295
-    )
-    saisir.pack(side="left", fill="y", padx=(0, 8))
-    saisir.pack_propagate(False)
+    # ── affichage image PNG dans visualisation ────────────────────
+    def show_png_in_canvas(path):
+        """Affiche une image PNG dans canvas_frame avec scroll vertical."""
+        for w in canvas_frame.winfo_children():
+            w.destroy()
 
-    #titre
-    title_param= customtkinter.CTkLabel(saisir, 
-                        text="Paramètres",
-                        font=customtkinter.CTkFont(size=15, weight="bold"), 
-                        text_color=DARK
-    )
-    title_param.pack(anchor="w", padx=16, pady=(14, 8))
+        if not path or not os.path.exists(path):
+            customtkinter.CTkLabel(canvas_frame,
+                                   text="Aucune image disponible.",
+                                   text_color=GREY).pack(expand=True)
+            return
 
-    #label pour f(x)
-    flabel= customtkinter.CTkLabel(saisir, 
-                        text="Définir la fonction",
-                        font=customtkinter.CTkFont(size=13), 
-                        text_color=DARK
-    )
-    flabel.pack(anchor="w", padx=16)
+        # Conteneur scrollable
+        scroll = customtkinter.CTkScrollableFrame(canvas_frame,fg_color="transparent")
+        scroll.pack(fill="both", expand=True)
 
-    #input
-    inputf = customtkinter.CTkEntry(saisir, 
-                                    width=263, 
-                                    height=38, 
-                                    corner_radius=8,
-                                    border_color=BORDER, 
-                                    border_width=1,
-                                    text_color= DARK,
-                                    fg_color=WHITE,
-                                    font=customtkinter.CTkFont(size=12),
-                                    placeholder_text=" ex: x**3 - 2*x - 5"
-    )
-    inputf.pack(padx=16, pady=(3, 12))
+        img = Image.open(path)
+        #redimensionner pour tenir dans la largeur dispo (~580px)
+        max_w = 580
+        ratio = max_w / img.width if img.width > max_w else 1
+        new_size = (int(img.width * ratio), int(img.height * ratio))
+        img = img.resize(new_size, Image.LANCZOS)
+        photo = ImageTk.PhotoImage(img)
 
-    #intervalle
-    lbl_interval = customtkinter.CTkLabel(saisir,
-                                        text="Intervalle [a, b]",
-                                        font=customtkinter.CTkFont(size=13), 
-                                        text_color=DARK)
+        lbl_img = tk.Label(scroll, image=photo, bg=WHITE)
+        lbl_img.image = photo   # garder référence
+        lbl_img.pack(padx=8, pady=8)
 
-    #frame pour les deux champs
-    group = customtkinter.CTkFrame(saisir,bg_color=WHITE, fg_color="transparent")
+    # ── on_calculer ───────────────────────────────────────────────
+    def get_params():
+        f_expr = inputf.get().strip()
+        if not f_expr:
+            show_err("Entrez f(x)")
+            return None
 
-    #a
-    a = customtkinter.CTkEntry(group, 
-                            placeholder_text="a",
-                            width=124, 
-                            height=38, 
-                            corner_radius=8,
-                            border_color=BORDER,
-                            text_color= DARK,
-                            fg_color=WHITE, 
-                            border_width=1, 
+        ep = tol_value[0]
+        params = {"f": f_expr, "ep": ep}
+
+        sel = current_sel.get()
+        if sel in ["Dichotomie", "Newton", "Point fixe",
+                   "Continuité", "Table de variation", "Signe de f(x)"]:
+            a_str = a_entry.get().strip()
+            b_str = b_entry.get().strip()
+            if not a_str or not b_str:
+                show_err("Entrez a et b")
+                return None
+            try:
+                params["a"] = float(a_str)
+                params["b"] = float(b_str)
+            except ValueError:
+                show_err("a ou b invalide")
+                return None
+
+        if sel in ["Newton", "Point fixe"]:
+            x0_str = input_x0.get().strip()
+            if not x0_str:
+                show_err("Entrez x0")
+                return None
+            try:
+                params["x0"] = float(x0_str)
+            except ValueError:
+                show_err("x0 invalide")
+                return None
+
+        if sel == "Point fixe":
+            phi_str = input_phi.get().strip()
+            if not phi_str:
+                show_err("Entrez phi(x)")
+                return None
+            params["phi"] = phi_str
+
+        return params
+
+    def run_algo(params, sel):
+        f_expr = params["f"]
+        ep     = params["ep"]
+        av     = params.get("a")
+        bv     = params.get("b")
+
+        try:
+            #================= DICHOTOMIE =================
+            if sel == "Dichotomie":
+                # dichotomie retourne (racine, iterations)
+                res = dichotomie(f_expr, av, bv, ep)
+
+                if res is None or res[0] is None:
+                    app.after(0, lambda: _algo_error(
+                        "Dichotomie : pas de racine dans [a,b] ou fonction discontinue."))
+                    return
+
+                racine, nb_iter = res
+
+                app.after(
+                    0,
+                    lambda r=racine, n=nb_iter:
+                    _update_result(f_expr, av, bv, r, n, sel)
+                )
+
+            # ================= NEWTON =================
+            elif sel == "Newton":
+
+                x0v = params["x0"]
+
+                # Vérifications
+                f_np = to_numpy(f_expr)
+
+                if not continu(f_np, av, bv):
+                    app.after(0, lambda: _algo_error(
+                        "Newton : f(x) n'est pas continue sur [a,b]."))
+                    return
+
+                if not check_x0(av, bv, x0v):
+                    app.after(0, lambda: _algo_error(
+                        "Newton : x0 doit être dans [a,b]."))
+                    return
+                # newton retourne (racine, iterations)
+                res = newton_r(f_expr, av, bv, x0v, ep)
+
+                if res is None or res[0] is None:
+                    app.after(0, lambda: _algo_error(
+                        "Newton ne converge pas sur cet intervalle.\nVérifiez [a,b] et x0."))
+                    return
+
+                racine, nb_iter = res
+
+                app.after(
+                    0,
+                    lambda r=racine, n=nb_iter:
+                    _update_result(f_expr, av, bv, r, n, sel)
+                )
+
+            # ================= POINT FIXE =================
+            elif sel == "Point fixe":
+
+                x0v     = params["x0"]
+                phi_str = params["phi"]
+
+                f_np = to_numpy(f_expr)
+
+                if not continu(f_np, av, bv):
+                    app.after(0, lambda: _algo_error(
+                        "Point fixe : f(x) n'est pas continue sur [a,b]."))
+                    return
+
+                if not check_x0(av, bv, x0v):
+                    app.after(0, lambda: _algo_error(
+                        "Point fixe : x0 doit être dans [a,b]."))
+                    return
+
+                # POINT FIXE retourne (racine, iterations)
+                res = point_fixe(f_expr, av, bv, phi_str, x0v, ep)
+
+                if res is None or res[0] is None:
+                    app.after(0, lambda: _algo_error(
+                        "Point fixe ne converge pas.\nVérifiez phi(x) : il faut |phi'(x)| < 1 sur [a,b]."))
+                    return
+
+                racine, nb_iter = res
+
+                app.after(
+                    0,
+                    lambda r=racine, n=nb_iter:
+                    _update_result(f_expr, av, bv, r, n, sel)
+                )
+
+        except Exception as e:
+            app.after(0, lambda: _algo_error(f"Erreur inattendue : {e}"))
+
+    def _algo_error(msg):
+        show_err(msg)
+        btn_calc.configure(state="normal", text="▶   Calculer")
+
+    def _update_result(f_expr, av, bv, racine, nb_iter, sel):
+        last_racine[0] = racine
+        f_np = to_numpy(f_expr)
+
+        lbl_racine.configure(text=f"{racine:.7f}",
+                             font=customtkinter.CTkFont(size=18, weight="bold"))
+        lbl_iters.configure(text=str(nb_iter) if nb_iter is not None else "—")
+        try:
+            lbl_frac.configure(text=f"{float(f_np(racine)):.2e}")
+        except:
+            lbl_frac.configure(text="—")
+        lbl_saved.configure(text="✓ Table et graphe enregistrés automatiquement")
+
+        # Chemins PNG selon algo
+        graph_map = {
+            "Dichotomie" : "resultat/dichotomie_graphe.png",
+            "Newton"     : "resultat/newtonR_graphe.png",
+            "Point fixe" : "resultat/ptfixe_graphe.png",
+        }
+
+        table_map = {
+            "Dichotomie" : "resultat/dichotomie_table.png",
+            "Newton"     : "resultat/newtonR_table.png",
+            "Point fixe" : "resultat/ptfixe_table.png",
+        }
+        last_graph_path[0] = graph_map.get(sel)
+        last_table_path[0] = table_map.get(sel)
+
+        # Afficher le graphe PNG généré par l'algo
+        show_png_in_canvas(last_graph_path[0])
+        btn_calc.configure(state="normal", text="▶   Calculer")
+
+    def on_calculer():
+        sel  = current_sel.get()
+        mode = current_mode.get()
+
+        if not sel:
+            show_err("Sélectionnez un algorithme ou une opération")
+            return
+
+        params = get_params()
+        if params is None:
+            return
+
+        f_expr = params["f"]
+        ep     = params["ep"]
+
+        if mode == "algo":
+            btn_calc.configure(state="disabled", text="Calcul...")
+            t = threading.Thread(target=run_algo, args=(params, sel), daemon=True)
+            t.start()
+
+        elif mode == "op":
+            try:
+                if sel == "Dérivée":
+                    df_sym = deriver(to_sympy(f_expr))
+                    lbl_res_op.configure(
+                        text=f"f'(x) = {df_sym}",
+                        font=customtkinter.CTkFont(size=13))
+
+                elif sel == "Continuité":
+                    av = params.get("a")
+                    bv = params.get("b")
+                    if av is None:
+                        show_err("Entrez a et b")
+                        return
+                    f_np = to_numpy(f_expr)
+                    ok = continu(f_np, av, bv)
+                    lbl_res_op.configure(
+                        text="✓ f(x) est continue sur [a, b]" if ok
+                             else "✗ f(x) est discontinue sur [a, b]\n(division par zéro ou valeur infinie détectée)",
+                        font=customtkinter.CTkFont(size=13),
+                        text_color=GREEN if ok else RED)
+
+                elif sel == "Table de variation":
+                    av = params.get("a")
+                    bv = params.get("b")
+                    if av is None:
+                        show_err("Entrez a et b")
+                        return
+                    # Vérifie continuité d'abord
+                    f_np = to_numpy(f_expr)
+                    if not continu(f_np, av, bv):
+                        lbl_res_op.configure(
+                            text="✗ Impossible : f(x) discontinue sur [a, b]",
+                            text_color=RED,
                             font=customtkinter.CTkFont(size=12))
+                        return
+                    df_sym = deriver(to_sympy(f_expr))
+                    df_np  = sympyto_numpy(df_sym)
+                    xs     = np.linspace(av, bv, 9)
+                    lines  = [f"{'x':>8}   {'f(x)':>12}   {'f\'(x)':>12}   {'variation'}"]
+                    lines += ["-"*52]
+                    for xi in xs:
+                        fval  = f_np(xi)
+                        dfval = df_np(xi)
+                        arrow = "↗" if dfval > 0 else ("↘" if dfval < 0 else "→")
+                        lines.append(
+                            f"{xi:>8.4f}   {fval:>12.5f}   {dfval:>12.5f}   {arrow}")
+                    lbl_res_op.configure(
+                        text="\n".join(lines),
+                        font=customtkinter.CTkFont(size=11, family="Courier"),
+                        text_color=DARK)
 
-    #b
-    b = customtkinter.CTkEntry(group, 
-                            placeholder_text="b",
-                            width=124, 
-                            height=38, 
-                            corner_radius=8,
-                            border_color=BORDER,
-                            text_color= DARK,
-                            fg_color=WHITE,
-                            border_width=1, 
+                elif sel == "Signe de f(x)":
+                    av = params.get("a")
+                    bv = params.get("b")
+                    if av is None:
+                        show_err("Entrez a et b")
+                        return
+                    f_np = to_numpy(f_expr)
+                    if not continu(f_np, av, bv):
+                        lbl_res_op.configure(
+                            text="✗ Impossible : f(x) discontinue sur [a, b]",
+                            text_color=RED,
                             font=customtkinter.CTkFont(size=12))
+                        return
+                    xs    = np.linspace(av, bv, 9)
+                    lines = [f"{'x':>8}   {'f(x)':>12}   {'signe'}"]
+                    lines += ["-"*36]
+                    for xi in xs:
+                        fval  = f_np(xi)
+                        signe = "(+)" if fval > 0 else ("(-)" if fval < 0 else "(0)")
+                        lines.append(f"{xi:>8.4f}   {fval:>12.5f}   {signe}")
+                    lbl_res_op.configure(
+                        text="\n".join(lines),
+                        font=customtkinter.CTkFont(size=11, family="Courier"),
+                        text_color=DARK)
 
-    a.pack(side="left", padx=(0, 6))
-    b.pack(side="left")
+            except Exception as e:
+                lbl_res_op.configure(
+                    text=f"Erreur : {e}",
+                    text_color=RED,
+                    font=customtkinter.CTkFont(size=12))
 
-    #tolerance
-    toler = customtkinter.CTkLabel(saisir, 
-                                text="Tolérance",
-                                font=customtkinter.CTkFont(size=13), 
-                                text_color=DARK)
-    toler.pack(anchor="w", padx=16)
+    # ── comparer les 3 méthodes ───────────────────────────────────
+# ── comparer les 3 méthodes (sans popup) ───────────────────────────────────
+    def on_comparer():
 
-    inputtol = customtkinter.CTkEntry(saisir, 
-                                    width=263, 
-                                    height=38,
-                                    corner_radius=8, 
-                                    border_color=BORDER,
-                                    text_color= DARK,
-                                    fg_color=WHITE, 
-                                    border_width=1,
-                                    font=customtkinter.CTkFont(size=12))
-    inputtol.pack(padx=16, pady=(3, 12))
+        f_expr = inputf.get().strip()
+        a_str  = a_entry.get().strip()
+        b_str  = b_entry.get().strip()
+        ep     = tol_value[0]
+        x0_str = input_x0.get().strip()
 
-    #btn de calcule
-    btn_calc= customtkinter.CTkButton(saisir, 
-                                    text="▶   Calculer",
-                                    width=263, 
-                                    height=44,
-                                    fg_color=YELLOW, 
-                                    text_color=DARK, 
-                                    hover_color=YELLOW_HVR,
-                                    font=customtkinter.CTkFont(size=14, weight="bold"),
-                                    corner_radius=10
-        # command=on_calculer a faire
-    )
+        if not f_expr or not a_str or not b_str:
+            show_err("Entrez f(x), a et b pour comparer")
+            return
+
+        try:
+            av = float(a_str)
+            bv = float(b_str)
+
+        except ValueError:
+            show_err("Paramètre invalide")
+            return
+
+        if not x0_str:
+            show_err("Entrez x0 (requis pour Newton et point fixe)")
+            return
+
+        try:
+            x0v = float(x0_str)
+
+        except ValueError:
+            show_err("x0 invalide")
+            return
+
+        results = {}
+        iters_map = {}
+
+        # ================= DICHOTOMIE =================
+        try:
+            res = dichotomie(f_expr, av, bv, ep)
+            if res and res[0] is not None:
+                racine, nb_iter = res
+                results["Dichotomie"]   = racine
+                iters_map["Dichotomie"] = nb_iter
+            else:
+                results["Dichotomie"] = None
+        except Exception as e:
+            results["Dichotomie"] = f"Erreur: {e}"
+
+        # ================= NEWTON =================
+        try:
+            res = newton_r(f_expr, av, bv, x0v, ep)
+            if res and res[0] is not None:
+                racine, nb_iter = res
+                results["Newton"] = racine
+                iters_map["Newton"] = nb_iter
+            else:
+                results["Newton"] = None
+        except Exception as e:
+            results["Newton"] = f"Erreur: {e}"
+
+        # ================= POINT FIXE =================
+        phi_str = input_phi.get().strip()
+        if phi_str:
+            try:
+                res = point_fixe(f_expr, av, bv, phi_str, x0v, ep)
+                if res and res[0] is not None:
+                    racine, nb_iter = res
+                    results["Point fixe"] = racine
+                    iters_map["Point fixe"] = nb_iter
+                else:
+                    results["Point fixe"] = None
+            except Exception as e:
+                results["Point fixe"] = f"Erreur: {e}"
+        else:
+            results["Point fixe"] = "phi(x) non fourni"
+
+        # ================= MEILLEURE METHODE =================
+        valid_iters = {
+            k: v for k, v in iters_map.items()
+            if isinstance(v, int)
+        }
+        best = min(valid_iters, key=valid_iters.get) if valid_iters else None
+
+        # ================= AFFICHAGE DANS L'INTERFACE PRINCIPALE =================
+        
+        # Si une méthode a trouvé une racine valide l'afficher dans les champs
+        best_racine = None
+        best_nb_iter = None
+        best_method = None
+        
+        for meth, val in results.items():
+            if isinstance(val, float):
+                if best_racine is None or iters_map.get(meth, 999) < best_nb_iter if best_nb_iter else True:
+                    best_racine = val
+                    best_nb_iter = iters_map.get(meth)
+                    best_method = meth
+        
+        if best_racine is not None:
+            # Afficher la meilleure racine 
+            lbl_racine.configure(text=f"{best_racine:.7f}",
+                                font=customtkinter.CTkFont(size=18, weight="bold"))
+            lbl_iters.configure(text=str(best_nb_iter) if best_nb_iter is not None else "—")
+            
+            # Calculer f(racine)
+            try:
+                f_np = to_numpy(f_expr)
+                lbl_frac.configure(text=f"{float(f_np(best_racine)):.2e}")
+            except:
+                lbl_frac.configure(text="—")
+            
+            # Message de confirmation
+            lbl_saved.configure(text=f"✓ Comparaison terminée - Les graphes et tables sont enregistrer")
+            
+            # Générer et afficher le graphe pour la meilleure méthode
+            try:
+                # Choisir le graphe selon la meilleure méthode
+                graph_path = {
+                    "Dichotomie": "resultat/dichotomie_graphe.png",
+                    "Newton": "resultat/newtonR_graphe.png", 
+                    "Point fixe": "resultat/ptfixe_graphe.png"
+                }.get(best_method)
+                
+                if graph_path and os.path.exists(graph_path):
+                    show_png_in_canvas(graph_path)
+                    last_graph_path[0] = graph_path
+                    last_table_path[0] = {
+                        "Dichotomie": "resultat/dichotomie_table.png",
+                        "Newton": "resultat/newtonR_table.png",
+                        "Point fixe": "resultat/ptfixe_table.png"
+                    }.get(best_method)
+            except:
+                pass
+                
+            # Afficher un les resultat
+            summary_text = f"📊 Comparaison des 3 méthodes:\n"
+            for meth, val in results.items():
+                if isinstance(val, float):
+                    summary_text += f"• {meth}: {val:.7f} ({iters_map.get(meth, '?')} itérations)\n"
+                elif val is None:
+                    summary_text += f"• {meth}: Pas de convergence\n"
+                else:
+                    summary_text += f"• {meth}: {str(val)[:30]}\n"
+            
+            summary_text += f"🏆 Meilleure méthode: {best_method} ({best_nb_iter} itérations)"
+            
+            # Mettre à jour le label de recommandation/tip
+            lbl_tip.configure(text=summary_text, wraplength=350)
+            
+        else:
+            show_err("Aucune méthode n'a convergé vers une racine")
+
+    # ── voir itérations : fenêtre popup avec tableau ──────────────
+    def on_voir_iter():
+        sel = current_sel.get()
+
+        # Afficher le PNG de la table dans la visualisation
+        if last_table_path[0] and os.path.exists(last_table_path[0]):
+            show_png_in_canvas(last_table_path[0])
+            return
+
+        show_err("Lancez d'abord un calcul")
+
+    # ── btn calculer ──────────────────────────────────────────────
+    btn_calc = customtkinter.CTkButton(saisir, text="▶   Calculer",
+                                       width=263, height=42,
+                                       fg_color=YELLOW, text_color=DARK,
+                                       hover_color=YELLOW_HVR,
+                                       font=customtkinter.CTkFont(size=14,
+                                                                   weight="bold"),
+                                       corner_radius=10,
+                                       command=on_calculer)
     btn_calc.pack(side="bottom", pady=14, padx=16)
 
-    #partie resultat 
-    result = customtkinter.CTkFrame(body, bg_color=WHITE,
-                                    fg_color=WHITE, 
-                                    corner_radius=12)
+    # ── résultats algo ────────────────────────────────────────────
+    result = customtkinter.CTkFrame(body, bg_color=WHITE, fg_color=WHITE,corner_radius=12)
     result.pack(side="left", fill="both", expand=True)
 
-    #titre 
-    titreres= customtkinter.CTkLabel(result,
-                                    text="Résultats",
-                                    font=customtkinter.CTkFont(size=14, weight="bold"), 
-                                    text_color=DARK
-    )
-    titreres.pack(anchor="w", padx=16, pady=(14, 8))
+    customtkinter.CTkLabel(result, text="Résultats",
+                           font=customtkinter.CTkFont(size=14, weight="bold"),
+                           text_color=DARK).pack(anchor="w", padx=16, pady=(14,8))
 
-    #fonction pour creer  les lables de le bloc resultat 
-    def result_block(title, default="—", val_color=DARK, val_size=22):
-        f = customtkinter.CTkFrame(result,
-                                fg_color="transparent")
-        f.pack(anchor="w", padx=16, pady=(0, 10))
-        l= customtkinter.CTkLabel(f, 
-                                text=title,
-                                font=customtkinter.CTkFont(size=11), 
-                                text_color=GREY
-        )
-        l.pack(anchor="w")
-        lv = customtkinter.CTkLabel(f, 
-                                    text=default,
-                                    font=customtkinter.CTkFont(size=val_size, weight="bold"),
+    def result_block(parent, title, default="—", val_color=DARK, val_size=18):
+        fr = customtkinter.CTkFrame(parent, fg_color="transparent")
+        fr.pack(anchor="w", padx=16, pady=(0,8))
+        customtkinter.CTkLabel(fr, text=title,
+                               font=customtkinter.CTkFont(size=11),
+                               text_color=GREY).pack(anchor="w")
+        lv = customtkinter.CTkLabel(fr, text=default,
+                                    font=customtkinter.CTkFont(size=val_size,weight="bold"),
                                     text_color=val_color)
         lv.pack(anchor="w")
         return lv
 
-    lbl_racine = result_block("Racine trouvée",      "—", GREEN, 20)
-    lbl_iters  = result_block("Nombre d'itérations", "—", DARK,  24)
-    lbl_frac   = result_block("Valeur de f(racine)", "—", DARK,  14)
+    lbl_racine = result_block(result, "Racine trouvée",       "—", GREEN, 18)
+    lbl_iters  = result_block(result, "Nombre d'itérations",  "—", DARK,  16)
+    lbl_frac   = result_block(result, "f(racine)",            "—", DARK,  12)
 
-    #recommandation message 
+    lbl_saved = customtkinter.CTkLabel(result, text="",
+                                       font=customtkinter.CTkFont(size=11),text_color="#0F6E56")
+    lbl_saved.pack(anchor="w", padx=16, pady=(0,6))
+
     RECO = {
-        "Dichotomie"  : "Méthode de dichotomie est recommandee pour cette fonction (convergence rapide)",
-        "Newton"      : "Méthode de Newton est recommandee pour cette fonction (convergence rapide)",
-        "Point fixe"  : "Méthode de Point fixe est recommandee pour cette fonction (convergence rapide)",
+        "Dichotomie" : "Dichotomie : robuste, ordre 1. \nLent mais sûr.",
+        "Newton"     : "Newton : ordre 2, très rapide si f'(x) ≠ 0.",
+        "Point fixe" : "Point fixe : dépend de phi. \nChoisir |phi'| < 1.",
     }
-
-    #recommandation
-    box = customtkinter.CTkFrame(result, 
-                                    fg_color=TIP_BG,
-                                    corner_radius=10, 
-                                    border_width=1, 
-                                    border_color=TIP_BORDER)
-    box.pack(fill="x", padx=16, pady=(4, 8))
-
-    rec=customtkinter.CTkLabel(box, 
-                        text="💡  Recommandation",
-                        font=customtkinter.CTkFont(size=12, weight="bold"), 
-                        text_color="#7a6500"
-    )
-    rec.pack(anchor="w", padx=10, pady=(8, 2))
-
+    box = customtkinter.CTkFrame(result, fg_color=TIP_BG, corner_radius=10,
+                                  border_width=1, border_color=TIP_BORDER)
+    box.pack(fill="x", padx=16, pady=(4,8))
+    customtkinter.CTkLabel(box, text="💡  Recommandation",
+                           font=customtkinter.CTkFont(size=12, weight="bold"),
+                           text_color="#7a6500").pack(anchor="w", padx=10, pady=(8,2))
     lbl_tip = customtkinter.CTkLabel(box,
-                                    text=RECO["Dichotomie"],
-                                    font=customtkinter.CTkFont(size=11), 
-                                    text_color="#7a6500",
-                                    justify="left"
-    )
-    lbl_tip.pack(anchor="w", padx=10, pady=(0, 8))
+                                     text="Sélectionnez un algorithme.\n Veuillez saisir ces fonction correctement:\n- e^x: exp(x),      -Ln(x): log(x),       -log10(x): log(x,10),       -|x|: abs(x),       -π: pi.",
+                                     font=customtkinter.CTkFont(size=11),
+                                     text_color="#7a6500", justify="left",
+                                     wraplength=500)
+    lbl_tip.pack(anchor="w", padx=10, pady=(0,8))
 
-    #  a faire
-    def best_algo():
-        return 
+    def _update_reco(name):
+        lbl_tip.configure(text=RECO.get(name, "Sélectionnez un algorithme."))
 
-    def update_reco():
-        algo = best_algo()
-        lbl_tip.configure(text=RECO.get(algo, ""))
+    # ── boutons voir iter + comparer ──────────────────────────────
+    btn_row = customtkinter.CTkFrame(result, fg_color="transparent")
+    btn_row.pack(fill="x", padx=16, pady=(4,8))
 
-    #btn iterations
-    btn_iter= customtkinter.CTkButton(result, 
-                                    text="voir iteration",
-                                    width=263, 
-                                    height=44,
-                                    fg_color=WHITE, 
-                                    text_color=DARK, 
-                                    hover_color=YELLOW_HVR,
-                                    font=customtkinter.CTkFont(size=14, weight="bold"),
-                                    corner_radius=10,
-                                    border_color= YELLOW,
-                                    border_width=1
-        # command=tableau des resultats a faire
-    )
-    btn_iter.pack(side="left" , pady=10, padx=15)
+    btn_iter = customtkinter.CTkButton(btn_row, text="Voir itérations",
+                                       width=130, height=36,
+                                       fg_color=WHITE, text_color=DARK,
+                                       hover_color=YELLOW_HVR,font=customtkinter.CTkFont(size=12),
+                                       corner_radius=8,border_color=YELLOW, border_width=1,command=on_voir_iter)
+    btn_iter.pack(side="left")
 
-    #btn comparaison
-    btn_meth= customtkinter.CTkButton(result, 
-                                    text="comparer methodes",
-                                    width=263, 
-                                    height=44,
-                                    fg_color=YELLOW, 
-                                    text_color=DARK, 
-                                    hover_color=YELLOW_HVR,
-                                    font=customtkinter.CTkFont(size=14, weight="bold"),
-                                    corner_radius=10
-        # command=tableau des resultats a faire
-    )
-    btn_meth.pack(side="right", pady=10, padx=16)
+    btn_meth = customtkinter.CTkButton(btn_row, text="Comparer méthodes",
+                                       width=150, height=36,
+                                       fg_color=YELLOW, text_color=DARK,
+                                       hover_color=YELLOW_HVR,font=customtkinter.CTkFont(size=12),
+                                       corner_radius=8,command=on_comparer)
+    btn_meth.pack(side="right")
 
-    #partie visaulaisation
-    visualisation = customtkinter.CTkFrame(app, bg_color=WHITE,
-                                        fg_color=WHITE, 
-                                        corner_radius=12)
-    visualisation.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+    # ── visualisation (avec scroll) ───────────────────────────────
+    visualisation = customtkinter.CTkFrame(app, bg_color=WHITE, fg_color=WHITE,corner_radius=12)
+    visualisation.pack(fill="both", expand=True, padx=14, pady=(0,14))
 
-    #header
-    header = customtkinter.CTkFrame(visualisation, 
-                                    fg_color="transparent")
-    header.pack(fill="x", padx=14, pady=(10, 0))
+    vis_header = customtkinter.CTkFrame(visualisation, fg_color="transparent")
+    vis_header.pack(fill="x", padx=14, pady=(10,4))
+    customtkinter.CTkLabel(vis_header, text="Visualisation",
+                           font=customtkinter.CTkFont(size=13, weight="bold"),
+                           text_color=DARK).pack(side="left")
 
-    #title
-    vistitle=customtkinter.CTkLabel(header, 
-                                    text="Visualisation",
-                                    font=customtkinter.CTkFont(size=13, weight="bold"), 
-                                    text_color=DARK
-    )
-    vistitle.pack(side="left")
+    # Boutons graphe / table dans visualisation
+    vis_btn_row = customtkinter.CTkFrame(vis_header, fg_color="transparent")
+    vis_btn_row.pack(side="right")
 
-    #btn sauvgarde grph
-    btnsauv= customtkinter.CTkButton(header, 
-                                    text="⬇  Exporter résultats",
-                                    width=160,
-                                    height=30,
-                                    fg_color=LIGHT_BG, 
-                                    text_color=DARK,
-                                    hover_color=BORDER,
-                                    border_width=1,
-                                    border_color=BORDER,
-                                    corner_radius=8, 
-                                    font=customtkinter.CTkFont(size=11)
-        # command=on_exporter a faire
-    )
-    btnsauv.pack(side="right")
+    def show_graph_view():
+        show_png_in_canvas(last_graph_path[0])
 
-    #fonction pour les mises a jour
-    def update_inputs(name):
-        mode = current_mode.get()
+    def show_table_view():
+        show_png_in_canvas(last_table_path[0])
 
-        # cacher tout
-        lbl_interval.pack_forget()
-        group.pack_forget()
-        inputtol.pack_forget()
-        toler.pack_forget()
+    customtkinter.CTkButton(vis_btn_row, text="Graphe", width=80, height=28,
+                             fg_color=WHITE, text_color=DARK,
+                             hover_color=YELLOW_HVR,
+                             border_width=1, border_color=BORDER,
+                             font=customtkinter.CTkFont(size=11),
+                             corner_radius=6,
+                             command=show_graph_view).pack(side="left", padx=3)
+    customtkinter.CTkButton(vis_btn_row, text="Table", width=80, height=28,
+                             fg_color=WHITE, text_color=DARK,
+                             hover_color=YELLOW_HVR,
+                             border_width=1, border_color=BORDER,
+                             font=customtkinter.CTkFont(size=11),
+                             corner_radius=6,
+                             command=show_table_view).pack(side="left", padx=3)
 
-        if mode == "algo":
-            if name == "Dichotomie" or name == "Newton":
-                lbl_interval.pack(anchor="w", padx=16)
-                group.pack(padx=16, pady=(3, 12))
-                toler.pack(anchor="w", padx=16)
-                inputtol.pack(padx=16, pady=(3, 12))
+    canvas_frame = customtkinter.CTkFrame(visualisation, fg_color="transparent")
+    canvas_frame.pack(fill="both", expand=True, padx=14, pady=(0,10))
+    customtkinter.CTkLabel(canvas_frame,text="Le graphe apparaîtra ici après le calcul.",
+                           font=customtkinter.CTkFont(size=12),
+                           text_color=GREY).pack(expand=True)
 
-            elif name == "Point fixe":
-                toler.pack(anchor="w", padx=16)
-                inputtol.pack(padx=16, pady=(3, 12))
-
-        elif mode == "op":
-            if name == "Dérivée":
-                # juste f(x)
-                pass
-
-            elif name == "Continuité":
-                lbl_interval.pack(anchor="w", padx=16)
-                group.pack(padx=16, pady=(3, 12))
-
-            elif name == "Table de variation":
-                lbl_interval.pack(anchor="w", padx=16)
-                group.pack(padx=16, pady=(3, 12))
-
-            elif name == "Signe de f(x)":
-                lbl_interval.pack(anchor="w", padx=16)
-                group.pack(padx=16, pady=(3, 12))
-
-    #fonction pour effacer les champs   
-    def clear_inputs():
-        inputf.delete(0, "end")
-        inputtol.delete(0, "end")
-        a.delete(0, "end")
-        b.delete(0, "end")
-
-    #fonction a utilise apres
-    def get_inputs():
-        return {
-            "f": inputf.get(),
-            "a": a.get(),
-            "b": b.get(),
-            "tol": inputtol.get(),
-            "mode": current_mode.get(), #le mode soit algo ou opt
-            "selection": current_sel.get() #il a selectionner quoi
-        }
-
-    resultat = customtkinter.CTkFrame(body, 
-                                    fg_color=WHITE, 
-                                    corner_radius=12)
-
-    titreres= customtkinter.CTkLabel(resultat,
-                                            text="Résultats",
-                                            font=customtkinter.CTkFont(size=14, weight="bold"), 
-                                            text_color=DARK
-            )
-    titreres.pack(anchor="w", padx=16, pady=(14, 8))
-
-    def update_mode_ui():
-        mode = current_mode.get()
-
-        if mode == "algo":
-            visualisation.pack(fill="both", expand=True, padx=14, pady=(0, 14))
-            result.pack(side="left", fill="both", expand=True)
-
-        elif mode == "op":
-            # cacher visualisation
-            visualisation.pack_forget()
-            # agrandir la zone resultat
-            result.pack_forget()
-            resultat.pack(side="left", fill="both", expand=True)
+    # ── résultats mode op ─────────────────────────────────────────
+    resultat = customtkinter.CTkScrollableFrame(
+        body,fg_color=WHITE,bg_color=WHITE,corner_radius=12)
+    customtkinter.CTkLabel(resultat, text="Résultats",font=customtkinter.CTkFont(size=14, weight="bold"),
+                           text_color=DARK).pack(anchor="w", padx=16, pady=(14,8))
+    lbl_res_op = customtkinter.CTkLabel(resultat, text="—",
+                                         font=customtkinter.CTkFont(size=12),
+                                         text_color=DARK, justify="left",
+                                         wraplength=350)
+    lbl_res_op.pack(anchor="w", padx=16, pady=8)
