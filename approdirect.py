@@ -7,22 +7,11 @@ import sympy as sp
 import random
 
 
-def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
-                      lbl_matM, canvas_frame, format_matrix):
-
-    # =========================================================
-    # RECUPERATION DES DONNEES DE L'INTERFACE
-    # =========================================================
-
-    # ---------- fonction ----------
+def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format_matrix):
+    #recuperation donnee
     try:
-        # exemple :
-        # sin(x)
-        # x**2 + 3*x
-        # exp(x)
-        f_str = inputs["mc_func"]
 
-        # verifier que le champ n'est pas vide
+        f_str = inputs["mc_func"]
         if f_str.strip() == "":
             raise ValueError
 
@@ -33,7 +22,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         )
         return
 
-    # ---------- intervalle ----------
     try:
         a = float(inputs["mc_a"])
         b = float(inputs["mc_b"])
@@ -45,7 +33,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         )
         return
 
-    # verifier que a < b
     if a >= b:
         messagebox.showerror(
             "Erreur",
@@ -53,7 +40,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         )
         return
 
-    # ---------- degré max ----------
     try:
         S = int(inputs["mc_deg"])
 
@@ -64,7 +50,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         )
         return
 
-    # le degré doit etre positif
     if S < 0:
         messagebox.showerror(
             "Erreur",
@@ -73,21 +58,12 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         return
 
 
-    # =========================================================
-    # TRANSFORMATION DE LA FONCTION TEXTE
-    # EN VRAIE FONCTION PYTHON
-    # =========================================================
 
+#transfert fonction str en fnct nqdro nkhdmo biha
     try:
-
-        # creation du symbole x
         x = sp.Symbol("x")
-
-        # transforme le texte en expression mathematique
+        # txt en expression math
         expr = sp.sympify(f_str)
-
-        # transforme l'expression en fonction python
-        # compatible avec numpy
         f = sp.lambdify(x, expr, modules=["numpy"])
 
     except:
@@ -98,121 +74,60 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         return
 
 
-    # =========================================================
-    # FONCTION QUI CALCULE LE POLYNOME
-    # P(x) = a0 + a1*x + a2*x² + ...
-    # =========================================================
 
+#calc polynome
     def poly(a, x):
-
-        # tableau resultat rempli de zeros
         res = np.zeros_like(x, dtype=float)
-
-        # ajout de chaque terme
         for i, ai in enumerate(a):
             res += ai * (x ** i)
 
         return res
 
-
-    # =========================================================
-    # DICTIONNAIRES POUR STOCKER :
-    # - coefficients
-    # - couts
-    # - matrices
-    # =========================================================
-
     coefficients = {}
     couts = {}
     matrices = {}
 
-
-    # =========================================================
-    # BOUCLE SUR TOUS LES DEGRES
-    # de 0 jusqu'à S
-    # =========================================================
-
     for s in range(S + 1):
 
-        # =====================================================
-        # MATRICE DE GRAM
-        # G(i,j) = ∫ x^(i+j)
-        # =====================================================
-
-        G = np.zeros((s + 1, s + 1))
+        M = np.zeros((s + 1, s + 1))
 
         for i in range(s + 1):
             for j in range(s + 1):
-
-                # formule analytique :
-                # ∫ x^n dx
-                G[i, j] = (
+                M[i, j] = (
                     (b ** (i + j + 1))
                     - (a ** (i + j + 1))
                 ) / (i + j + 1)
 
 
-        # =====================================================
-        # VECTEUR d
-        # d(i) = ∫ f(x)*x^i
-        # =====================================================
 
+        # vecteur d
         d = np.zeros(s + 1)
-
         for i in range(s + 1):
 
-            # quad retourne :
-            # valeur_integrale , erreur
-            d[i], _ = integrate.quad(
-                lambda t: f(t) * (t ** i),
-                a,
-                b
-            )
+        # afin de calculer l integrale
+            d[i], _ = integrate.quad(lambda t: f(t) * (t ** i),a,b)
+
+        #resoudre systeme lineaire
+        a_coef = np.linalg.solve(M, d)
 
 
-        # =====================================================
-        # RESOLUTION DU SYSTEME
-        # G*a = d
-        # =====================================================
+     
+        # calcul cout 
+        
 
-        a_coef = np.linalg.solve(G, d)
+        def fonccout(x):
 
+            return (f(x)- poly(a_coef, np.array([x]))[0]) ** 2
 
-        # =====================================================
-        # CALCUL DE L'ERREUR
-        # J = ∫ (f(x)-P(x))²
-        # =====================================================
-
-        def integrand(x):
-
-            # poly retourne un tableau
-            # donc on prend [0]
-            return (
-                f(x)
-                - poly(a_coef, np.array([x]))[0]
-            ) ** 2
-
-        J, _ = integrate.quad(
-            integrand,
-            a,
-            b
-        )
-
-
-        # =====================================================
-        # SAUVEGARDE DES RESULTATS
-        # =====================================================
+        J, _ = integrate.quad(fonccout,a,b)
 
         coefficients[s] = a_coef
         couts[s] = J
-        matrices[s] = G
+        matrices[s] = M
 
 
-    # =========================================================
-    # RECHERCHE DU MEILLEUR POLYNOME
-    # celui qui minimise le cout
-    # =========================================================
 
+    #best poly
     best = min(couts, key=couts.get)
 
     best_a = coefficients[best]
@@ -220,10 +135,8 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
     best_M = matrices[best]
 
 
-    # =========================================================
-    # AFFICHAGE TEXTE DU MEILLEUR POLYNOME
-    # =========================================================
 
+# affiche meilleur polynome
     termes = []
 
     for i in range(len(best_a)):
@@ -243,28 +156,20 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
     )
 
 
-    # =========================================================
-    # AFFICHAGE DU COUT
-    # =========================================================
 
+    # affiche cout
     lbl_cout.configure(
         text=f"{best_J:.8f}"
     )
 
 
-    # =========================================================
-    # AFFICHAGE DE LA MATRICE
-    # =========================================================
-
+#affiche matrice
     lbl_matM.configure(
         text=format_matrix(best_M)
     )
 
 
-    # =========================================================
-    # CREATION DE LA FIGURE MATPLOTLIB
-    # =========================================================
-
+#graphe
     fig = plt.Figure(figsize=(5, 4), dpi=100)
 
     ax = fig.add_subplot(111)
@@ -273,17 +178,12 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
     canvas_frame.figure = fig
 
 
-    # =========================================================
-    # CREATION DES POINTS x POUR LE DESSIN
-    # =========================================================
+#creation points
 
     x_plot = np.linspace(a, b, 400)
 
 
-    # =========================================================
-    # DESSIN DE LA FONCTION REELLE
-    # =========================================================
-
+#fonction
     y_f = f(x_plot)
 
     ax.plot(
@@ -294,10 +194,6 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         label="f(x)"
     )
 
-
-    # =========================================================
-    # GENERATION DE COULEURS ALEATOIRES
-    # =========================================================
 
     colors = []
 
@@ -310,9 +206,7 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
         colors.append((r, g, b_color))
 
 
-    # =========================================================
-    # DESSIN DE TOUS LES POLYNOMES
-    # =========================================================
+#dessinzz
 
     for s in range(S + 1):
 
@@ -344,40 +238,19 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout,
             )
 
 
-    # =========================================================
-    # DETAILS GRAPHE
-    # =========================================================
-
     ax.grid(True)
-
     ax.legend()
-
     ax.set_title(
         "Approximation continue"
     )
 
 
-    # =========================================================
-    # SUPPRIMER L'ANCIEN GRAPHE
-    # =========================================================
-
+#supp ancien graphe
     for widget in canvas_frame.winfo_children():
         widget.destroy()
 
 
-    # =========================================================
-    # AFFICHAGE DU NOUVEAU GRAPHE
-    # DANS TKINTER
-    # =========================================================
-
-    canvas = FigureCanvasTkAgg(
-        fig,
-        master=canvas_frame
-    )
-
+#affiche nv grapghe
+    canvas = FigureCanvasTkAgg(fig,master=canvas_frame)
     canvas.draw()
-
-    canvas.get_tk_widget().pack(
-        fill="both",
-        expand=True
-    )
+    canvas.get_tk_widget().pack(fill="both",expand=True)
