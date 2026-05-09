@@ -658,6 +658,7 @@ def show(app, navigate):
 
     #descente de gradient
     grad_frame = customtkinter.CTkFrame(right_col, 
+                                        height=0,
                                         fg_color="transparent")
 
     # fonction
@@ -677,17 +678,17 @@ def show(app, navigate):
                                             text_color=DARK,
                                             font=customtkinter.CTkFont(size=12), 
                                             placeholder_text="ex: x**2 - 3*y + 2")
-    grad_func_input.pack(anchor="w", pady=(4, 0))
+    grad_func_input.pack(anchor="w")
 
     #les inputs
     grad_row1 = customtkinter.CTkFrame(grad_frame, 
                                     fg_color="transparent")
-    grad_row1.pack(anchor="w", pady=(10, 0))
+    grad_row1.pack(anchor="w")
 
     # x0
     grad_x0_col = customtkinter.CTkFrame(grad_row1, 
                                         fg_color="transparent")
-    grad_x0_col.pack(side="left", padx=(0, 12))
+    grad_x0_col.pack(side="left")
 
     x0_lab= customtkinter.CTkLabel(grad_x0_col, 
                         text="Valeurs Initiales",
@@ -705,12 +706,12 @@ def show(app, navigate):
                                         text_color=DARK,
                                         font=customtkinter.CTkFont(size=12), 
                                         placeholder_text="ex: 0, 1,...")
-    grad_x0_input.pack(pady=(4, 0))
+    grad_x0_input.pack()
 
     sepV= customtkinter.CTkFrame(grad_row1, 
                         width=1, 
                         fg_color=BORDER)
-    sepV.pack(side="left", fill="y", padx=4, pady=2)
+    sepV.pack(side="left", fill="y", padx=4)
 
     # pas
     grad_pas_col = customtkinter.CTkFrame(grad_row1, 
@@ -733,14 +734,14 @@ def show(app, navigate):
                                             text_color=DARK,
                                             font=customtkinter.CTkFont(size=12), 
                                             placeholder_text="ex: 0.01")
-    grad_pas_input.pack(pady=(4, 0))
+    grad_pas_input.pack()
 
     # tolerance
     tol_lab= customtkinter.CTkLabel(grad_frame, 
                         text="Tolérance",
                         font=customtkinter.CTkFont(size=12), 
                         text_color=DARK)
-    tol_lab.pack(anchor="w", pady=(10, 0))
+    tol_lab.pack(anchor="w")
 
     gd_tol_input = customtkinter.CTkEntry(grad_frame, 
                                             width=263, 
@@ -752,19 +753,19 @@ def show(app, navigate):
                                             text_color=DARK,
                                             font=customtkinter.CTkFont(size=12), 
                                             placeholder_text="ex: 0.0001")
-    gd_tol_input.pack(anchor="w", pady=(4, 0))
+    gd_tol_input.pack(anchor="w")
 
     sep_dg = customtkinter.CTkFrame(grad_frame, 
                                     height=1, 
                                     fg_color=BORDER)
-    sep_dg.pack(fill="x", pady=(12, 8))
+    sep_dg.pack(fill="x", pady= (5,5))
 
     # resultats descente
     dg_result_lab= customtkinter.CTkLabel(grad_frame, 
                         text="Résultats",
                         font=customtkinter.CTkFont(size=14, weight="bold"), 
                         text_color=DARK)
-    dg_result_lab.pack(anchor="w", pady=(0, 6))
+    dg_result_lab.pack(anchor="w")
 
     dg_min= customtkinter.CTkLabel(grad_frame, 
                         text="Minimum local",
@@ -776,7 +777,7 @@ def show(app, navigate):
                                         text="—",
                                         font=customtkinter.CTkFont(size=20, weight="bold"), 
                                         text_color=GREEN)
-    lab_min.pack(anchor="w", pady=(2, 10))
+    lab_min.pack(anchor="w")
 
     dg_erreur_lab= customtkinter.CTkLabel(grad_frame, 
                         text="Erreur",
@@ -788,7 +789,7 @@ def show(app, navigate):
                                         text="—",
                                         font=customtkinter.CTkFont(size=16, weight="bold"), 
                                         text_color=BTN_DEL)
-    lbl_err_grad.pack(anchor="w", pady=(2, 10))
+    lbl_err_grad.pack(anchor="w")
     #recuperation des input de dg
     def get_input_gd():
         return [
@@ -836,7 +837,7 @@ def show(app, navigate):
             #afficher les resultats
             lab_min.configure(text=str(x))
             lbl_err_grad.configure(text=str(erreur))
-
+    
 
     #calcule
     btn_calc = customtkinter.CTkButton(right_col, 
@@ -924,9 +925,10 @@ def show(app, navigate):
             
 
         elif name == "Descente de gradient":
-            grad_frame.pack(anchor="w", padx=16, pady=(0, 8))
+            grad_frame.pack(anchor="w")
             pnt_fram.pack_forget()
             vis_outer.pack_forget()
+            param_title.pack_forget()
 
 
     def get_inputs():
