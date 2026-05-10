@@ -48,19 +48,18 @@ def show(app, navigate):
     customtkinter.CTkLabel(header,text="Axe 1 : Fonctions non linéaires",
                            font=customtkinter.CTkFont(size=17, weight="bold"),text_color=DARK).pack(side="left")
 
-    # ── body (upper section, taller) ──────────────────────────────
-    body = customtkinter.CTkFrame(app, fg_color="transparent", bg_color=WHITE,height=440)
+    #body
+    body = customtkinter.CTkFrame(app, fg_color="transparent", bg_color=WHITE,height=300)
     body.pack(fill="x", expand=False, padx=14, pady=(10,8))
     body.pack_propagate(False)
 
-    # ── colonne gauche ────────────────────────────────────────────
-    left_col = customtkinter.CTkFrame(
+    #colonne gauche
+    left_col = customtkinter.CTkScrollableFrame(
         body,fg_color=WHITE,bg_color=WHITE,
         corner_radius=12,width=190
     )
 
     left_col.pack(side="left", fill="y", padx=(0,8))
-    left_col.pack_propagate(False)
 
     customtkinter.CTkLabel(left_col, text="Algorithmes",
                            font=customtkinter.CTkFont(size=13, weight="bold"),
@@ -71,36 +70,38 @@ def show(app, navigate):
     current_sel  = tk.StringVar(value="")
     current_mode = tk.StringVar(value="algo")
 
-    # ── saisir ────────────────────────────────────────────────────
-    saisir = customtkinter.CTkFrame(body, fg_color=WHITE, bg_color=WHITE,corner_radius=12, width=295)
+    #saisir
+    saisir = customtkinter.CTkScrollableFrame(body, fg_color=WHITE, bg_color=WHITE,corner_radius=12, width=295)
     saisir.pack(side="left", fill="y", padx=(0,8))
-    saisir.pack_propagate(False)
 
-    customtkinter.CTkLabel(saisir, text="Paramètres",font=customtkinter.CTkFont(size=15, weight="bold"),
-                           text_color=DARK).pack(anchor="w", padx=16, pady=(14,8))
+    param= customtkinter.CTkLabel(saisir, text="Paramètres",font=customtkinter.CTkFont(size=15, weight="bold"),
+                           text_color=DARK)
+    param.pack(anchor="w", padx=16, pady=(14,8))
 
-    customtkinter.CTkLabel(saisir, text="Définir f(x)",
+    f=customtkinter.CTkLabel(saisir, text="Définir f(x)",
                            font=customtkinter.CTkFont(size=13),
-                           text_color=DARK).pack(anchor="w", padx=16)
+                           text_color=DARK)
+    f.pack(anchor="w", padx=16)
 
     inputf = customtkinter.CTkEntry(saisir, width=263, height=36,
                                     corner_radius=8, border_color=BORDER,
                                     border_width=1, text_color=DARK,
                                     fg_color=WHITE,
                                     font=customtkinter.CTkFont(size=12),
-                                    placeholder_text="ex: x**3 - 2*x - 5")
+                                    placeholder_text="ex: sin(x)+x**3")
     inputf.pack(padx=16, pady=(3,10))
 
-    # widgets cachés
+    # widgets caches
     lbl_phi   = customtkinter.CTkLabel(saisir, text="Fonction phi(x)",
                                        font=customtkinter.CTkFont(size=13),
                                        text_color=DARK)
+    
     input_phi = customtkinter.CTkEntry(saisir, width=263, height=36,
                                        corner_radius=8, border_color=BORDER,
                                        border_width=1, fg_color=WHITE,
                                        text_color=DARK,
                                        font=customtkinter.CTkFont(size=12),
-                                       placeholder_text="ex: x/2 + 1/x")
+                                       placeholder_text="ex: x**2")
 
     lbl_x0   = customtkinter.CTkLabel(saisir, text="Point de départ x0",
                                       font=customtkinter.CTkFont(size=13),
@@ -110,7 +111,7 @@ def show(app, navigate):
                                       border_width=1, fg_color=WHITE,
                                       text_color=DARK,
                                       font=customtkinter.CTkFont(size=12),
-                                      placeholder_text="ex: 1.5")
+                                      placeholder_text="ex: 0")
 
     lbl_interval = customtkinter.CTkLabel(saisir, text="Intervalle [a, b]",
                                           font=customtkinter.CTkFont(size=13),
@@ -153,7 +154,7 @@ def show(app, navigate):
                                       text_color=RED, wraplength=263)
     lbl_err.pack(anchor="w", padx=16)
 
-    # ── helpers UI ────────────────────────────────────────────────
+    #help
     def show_err(msg):
         lbl_err.configure(text=msg)
         app.after(4000, lambda: lbl_err.configure(text=""))
@@ -182,6 +183,8 @@ def show(app, navigate):
                 lbl_tol_val.pack(anchor="e", padx=16)
 
             elif name == "Point fixe":
+                lbl_interval.pack(anchor="w", padx=16)
+                group.pack(padx=16, pady=(3,10))
                 lbl_phi.pack(anchor="w", padx=16)
                 input_phi.pack(padx=16, pady=(3,10))
                 lbl_x0.pack(anchor="w", padx=16)
@@ -262,7 +265,7 @@ def show(app, navigate):
         update_mode_ui()
         update_inputs(name)
 
-    # ── boutons algo ──────────────────────────────────────────────
+    #boutons
     for algo in ["Dichotomie", "Newton", "Point fixe"]:
         btn = customtkinter.CTkButton(left_col, text=algo, width=158,
                                       height=38, fg_color=WHITE,
@@ -295,7 +298,6 @@ def show(app, navigate):
 
     # ── affichage image PNG dans visualisation ────────────────────
     def show_png_in_canvas(path):
-        """Affiche une image PNG dans canvas_frame avec scroll vertical."""
         for w in canvas_frame.winfo_children():
             w.destroy()
 
@@ -773,8 +775,8 @@ def show(app, navigate):
                                        command=on_calculer)
     btn_calc.pack(side="bottom", pady=14, padx=16)
 
-    # ── résultats algo ────────────────────────────────────────────
-    result = customtkinter.CTkFrame(body, bg_color=WHITE, fg_color=WHITE,corner_radius=12)
+    # resultat
+    result = customtkinter.CTkScrollableFrame(body, bg_color=WHITE, fg_color=WHITE,corner_radius=12)
     result.pack(side="left", fill="both", expand=True)
 
     customtkinter.CTkLabel(result, text="Résultats",

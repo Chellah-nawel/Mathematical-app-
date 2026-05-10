@@ -46,10 +46,6 @@ def _poly_to_str(coeffs_numpy):
 
 
 def newton(X, Y):
-    """
-    Interpolation de Newton par differences divisees.
-    Retourne (coeffs_numpy, poly_str, diff, coeffs_dd)
-    """
     n = len(X)
 
     diff = [[0.0] * n for _ in range(n)]

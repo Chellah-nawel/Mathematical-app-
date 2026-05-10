@@ -47,14 +47,45 @@ def lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, canvas_frame, format
 #transfert fonction str en fnct nqdro nkhdmo biha
     try:
         x = sp.Symbol("x")
-        # txt en expression math
-        expr = sp.sympify(f_str)
+
+        fonctions_autorisees = {
+            "x": x,
+            "sin": sp.sin,
+            "cos": sp.cos,
+            "tan": sp.tan,
+            "exp": sp.exp,
+            "log": sp.log,
+            "sqrt": sp.sqrt,
+            "pi": sp.pi,
+            "E": sp.E
+        }
+
+        expr = sp.sympify(f_str, locals=fonctions_autorisees)
+
+        # verifier variables inconnues
+        variables = expr.free_symbols
+
+        if variables - {x}:
+            raise ValueError
+
+        # verifier fonctions inconnues
+        fonctions_valides = {
+            sp.sin, sp.cos, sp.tan,
+            sp.exp, sp.log, sp.sqrt
+        }
+
+        for func in expr.atoms(sp.Function):
+            if func.func not in fonctions_valides:
+                raise ValueError
+
         f = sp.lambdify(x, expr, modules=["numpy"])
 
     except:
-        messagebox.showerror("Erreur","Fonction mathématique invalide")
+        messagebox.showerror(
+            "Erreur",
+            "Fonction mathématique invalide"
+        )
         return
-
 
 
 #calc polynome
