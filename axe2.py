@@ -211,7 +211,6 @@ def show(app, navigate):
             w.destroy()
 
     def draw_convergence(errors, name):
-        """Affiche la courbe de convergence"""
         nonlocal _current_fig_canvas
         clear_vis()
         fig, ax = plt.subplots(figsize=(9, 1.9))
@@ -441,12 +440,13 @@ def show(app, navigate):
                 vec_input[i].insert(0, str(random.randint(1, 20)))
 
     for txt, cmd in [("Effacer", on_vide), ("Aléatoire", on_aleatoire)]:
-        customtkinter.CTkButton(btns, text=txt, width=100, height=30,
+        btn_eff_rand= customtkinter.CTkButton(btns, text=txt, width=100, height=30,
                                  fg_color=LIGHT_BG, text_color=DARK,
                                  hover_color=BORDER, border_width=1,
                                  border_color=BORDER, corner_radius=8,
                                  font=customtkinter.CTkFont(size=12),
-                                 command=cmd).pack(side="left", padx=4)
+                                 command=cmd)
+        btn_eff_rand.pack(side="left", padx=4)
 
     # taille n×n 
     size_row = customtkinter.CTkFrame(content, fg_color="transparent")
@@ -941,11 +941,14 @@ def show(app, navigate):
         clear_grid()
 
         if mode == "algo":
+            btns.pack(padx=16, pady=(4, 6))
             draw_matrix(n)
             draw_vector(n)
         elif name == "Normes vectorielles":
             draw_vector(n)
+            btns.pack_forget()
         else:
+            btns.pack(padx=16, pady=(4, 6))
             draw_matrix(n)
             lab_b.pack_forget()
 

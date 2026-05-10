@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from algo_descente_gradient import gradient_descent
 from sympy import symbols, sympify
 from lagrange import *
+import numpy as np
 
 def show(app, navigate):
 
@@ -82,6 +83,7 @@ def show(app, navigate):
                         text="Visualisation",
                         font=customtkinter.CTkFont(size=13, weight="bold"),
                         text_color=DARK).pack(side="left")
+    
     def on_export():
         fig = graph_frame.figure
 
@@ -97,6 +99,7 @@ def show(app, navigate):
         if file_path:
             fig.savefig(file_path, dpi=300, bbox_inches="tight")
             messagebox.showinfo("Succès", "Graphe exporté avec succès")
+            
     btn_export = customtkinter.CTkButton(vis_header, 
                                         text="⬇  Exporter résultats",
                                         width=160, 
@@ -803,7 +806,65 @@ def show(app, navigate):
     #fonction pour decider quoi faire qund il clique sur c=btn calculer 
     def on_calculer():
         # interpolation ou approximation
-        if current_sel.get() == "Moindres carrés":
+        if current_sel.get() == "Lagrange":
+            rows_alive = [r for r in point_rows if r["frame"].winfo_exists()]
+            if len(rows_alive) < 2:
+                messagebox.showerror("Erreur", "Veuillez saisir au moins 2 points.")
+                return
+
+            x_pts, y_pts = [], []
+            for r in rows_alive:
+                raw_x = r["x"].get().strip()
+                raw_y = r["y"].get().strip()
+                if raw_x == "" or raw_y == "":
+                    messagebox.showerror("Erreur", "Tous les champs x et y doivent être remplis.")
+                    return
+                try:
+                    x_pts.append(float(raw_x))
+                    y_pts.append(float(raw_y))
+                except ValueError:
+                    messagebox.showerror("Erreur", f"Valeur invalide : '{raw_x}' ou '{raw_y}'.")
+                    return
+
+            if len(set(x_pts)) != len(x_pts):
+                messagebox.showerror("Erreur", "Les valeurs de x doivent être distinctes.")
+                return
+
+            try:
+                resultat = poly_lagrange(x_pts, y_pts)
+            except Exception as e:
+                messagebox.showerror("Erreur inattendue", str(e))
+                return
+
+            if resultat is None:
+                messagebox.showerror("Erreur", "Le calcul a échoué. Vérifiez vos points.")
+                return
+
+            err_max, str_poly, fig = resultat
+            lbl_poly_interp.configure(text=str_poly)
+
+            for widget in graph_frame.winfo_children():
+                widget.destroy()
+
+            if not affiche_point.get():
+                x_arr = np.array(x_pts)
+                y_arr = np.array(y_pts)
+                xs = np.linspace(min(x_arr) - 0.5, max(x_arr) + 0.5, 500)
+                ys = np.array([lagrange(x_arr, y_arr, xi) for xi in xs])
+                fig, ax = plt.subplots(figsize=(8, 4))
+                ax.plot(xs, ys, color='black', linewidth=1.5, label='P(x)')
+                ax.axhline(0, color='black', linewidth=0.4)
+                ax.axvline(0, color='black', linewidth=0.4)
+                ax.set_title("Interpolation de Lagrange", fontsize=12, fontweight='bold')
+                ax.legend()
+                ax.grid(True, linestyle='--', alpha=0.5)
+
+            canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill="both", expand=True)
+            graph_frame.figure = fig
+
+        elif current_sel.get() == "Moindres carrés":
             inputs = get_inputs()
             if mc_mode.get() == "discret":
                 lancer_mc_depuis_interface(
@@ -930,7 +991,6 @@ def show(app, navigate):
             pnt_fram.pack_forget()
             vis_outer.pack_forget()
             param_title.pack_forget()
-            mc_func_frame.pack_forget()
 
 
     def get_inputs():
