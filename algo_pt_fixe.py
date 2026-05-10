@@ -43,12 +43,13 @@ def verify_K(phi,a,b):
 #phi is str
 def point_fixe(f_expr, a, b, phi_expr, x0, ep):
     maxi=100
-    # verifications
+    # verifications f
     if not continu(to_numpy(f_expr), a, b):
         return None,0
     if not verify_phi(f_expr, phi_expr):
         return None,0
-
+        
+    #verification phi
     k, contract = verify_K(phi_expr, a, b)
     if not contract:
         return None,0
@@ -69,12 +70,12 @@ def point_fixe(f_expr, a, b, phi_expr, x0, ep):
         x=xi
 
         if born <= ep:
-            print(f"Converge en {i+1} iterations")
+            print(f"converge en {i+1} ")
             draw_table(row)
             graphe(f,a,b,xi,iterations)
-            return xi, i+1   #racine 
+            return xi, i+1   #racine and nbr iteration
 
-    print("Max iterations atteint sans convergence")
+    print("max iterations pas de cv")
     return xi, i+1
 
 def draw_table(row):
