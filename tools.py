@@ -3,11 +3,15 @@ import sympy as sp
 
 x = sp.symbols("x")  
 
-def negatif_signe(f,a,b):
-    if f(a)*f(b)< 0: return True
-    else: 
-        print("-Pas de racine dans cette interval")
-        return False
+def negatif_signe(f, a, b, n=1000):
+    pts = np.linspace(a, b, n)
+    
+    for i in range(len(pts) - 1):
+        fa, fb = f(pts[i]), f(pts[i+1])
+        if np.isfinite(fa) and np.isfinite(fb) and fa * fb < 0:
+            return True
+    
+    return False
 
 def continu(f,a,b):
     if a <= 0 <= b:
