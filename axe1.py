@@ -459,7 +459,8 @@ def show(app, navigate):
                 )
 
         except Exception as e:
-            app.after(0, lambda: _algo_error(f"Erreur inattendue : {e}"))
+            err = str(e)
+            app.after(0, lambda: _algo_error(f"Erreur inattendue : {err}"))
 
     def _algo_error(msg):
         show_err(msg)
@@ -601,7 +602,6 @@ def show(app, navigate):
                     font=customtkinter.CTkFont(size=12))
 
     # ── comparer les 3 méthodes ───────────────────────────────────
-# ── comparer les 3 méthodes (sans popup) ───────────────────────────────────
     def on_comparer():
 
         f_expr = inputf.get().strip()
