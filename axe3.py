@@ -2,13 +2,17 @@ import customtkinter
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from appropoint import lancer_mc_depuis_interface
-from approdirect import  lancer_mc_continu
+from approdirect import lancer_mc_continu
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from algo_descente_gradient import gradient_descent
 from sympy import symbols, sympify
 from lagrange import *
+from algorithmes_axe3 import newton, calcule_poly
 import numpy as np
+
 
 def show(app, navigate):
 
@@ -73,8 +77,8 @@ def show(app, navigate):
     vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
 
     graph_frame = customtkinter.CTkFrame(vis_outer, fg_color="white")
-
     graph_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
     vis_header = customtkinter.CTkFrame(vis_outer, 
                                         fg_color="transparent")
     vis_header.pack(fill="x", padx=14, pady=(10, 0))
@@ -83,13 +87,13 @@ def show(app, navigate):
                         text="Visualisation",
                         font=customtkinter.CTkFont(size=13, weight="bold"),
                         text_color=DARK).pack(side="left")
-    
-    def on_export():
-        fig = graph_frame.figure
 
+    def on_export():
         if not hasattr(graph_frame, "figure"):
             messagebox.showerror("Erreur", "Aucun graphe à exporter")
             return
+
+        fig = graph_frame.figure
 
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
@@ -99,7 +103,7 @@ def show(app, navigate):
         if file_path:
             fig.savefig(file_path, dpi=300, bbox_inches="tight")
             messagebox.showinfo("Succès", "Graphe exporté avec succès")
-            
+
     btn_export = customtkinter.CTkButton(vis_header, 
                                         text="⬇  Exporter résultats",
                                         width=160, 
@@ -111,8 +115,7 @@ def show(app, navigate):
                                         border_color=BORDER, 
                                         corner_radius=8,
                                         font=customtkinter.CTkFont(size=11),
-                                        command=on_export 
-
+                                        command=on_export
     )
     btn_export.pack(side="right")
 
@@ -794,6 +797,7 @@ def show(app, navigate):
                                         font=customtkinter.CTkFont(size=16, weight="bold"), 
                                         text_color=BTN_DEL)
     lbl_err_grad.pack(anchor="w")
+
     #recuperation des input de dg
     def get_input_gd():
         return [
@@ -802,6 +806,10 @@ def show(app, navigate):
             grad_pas_input.get(),
             gd_tol_input.get()
         ]
+
+    # ── état partagé Newton ───────────────────────────────────────────────────
+    _last = {"poly_str": "", "diff": [], "coeffs_dd": [], "poly_asc": [],
+             "xs": [], "ys": []}
 
     #fonction pour decider quoi faire qund il clique sur c=btn calculer 
     def on_calculer():
@@ -864,6 +872,63 @@ def show(app, navigate):
             canvas.get_tk_widget().pack(fill="both", expand=True)
             graph_frame.figure = fig
 
+        elif current_sel.get() == "Newton":
+            inp = get_inputs()
+            rows = inp["points"]
+            if len(rows) < 2:
+                messagebox.showwarning("Points manquants", "Entrez au moins 2 points.")
+                return
+
+            try:
+                xs = [float(r["x"]) for r in rows]
+                ys = [float(r["y"]) for r in rows]
+            except ValueError:
+                messagebox.showerror("Erreur", "Les coordonnées doivent être des nombres.")
+                return
+
+            if len(set(xs)) != len(xs):
+                messagebox.showerror("Erreur", "Les abscisses x doivent être distinctes.")
+                return
+
+            try:
+                coeffs_numpy, poly_str, diff, coeffs_dd = newton(xs, ys)
+            except Exception as e:
+                messagebox.showerror("Erreur de calcul", str(e))
+                return
+
+            # poly en puissances croissantes pour calcule_poly
+            poly_asc = list(coeffs_numpy[::-1])
+
+            # affichage résultats
+            lbl_poly_interp.configure(text=poly_str)
+            _last.update(poly_str=poly_str, diff=diff, coeffs_dd=coeffs_dd,
+                         poly_asc=poly_asc, xs=xs, ys=ys)
+
+            # graphe Newton
+            for widget in graph_frame.winfo_children():
+                widget.destroy()
+
+            x_arr = np.array(xs)
+            x_plot = np.linspace(min(x_arr) - 1, max(x_arr) + 1, 400)
+            y_plot = [calcule_poly(poly_asc, x) for x in x_plot]
+
+            fig, ax = plt.subplots(figsize=(8, 4))
+            ax.plot(x_plot, y_plot, color="#1a73e8", linewidth=2, label="Newton")
+            if affiche_point.get():
+                ax.scatter(xs, ys, color=YELLOW, zorder=5, s=55, label="Points")
+            ax.set_title(poly_str, fontsize=9, fontweight="bold")
+            ax.set_xlabel("x", fontsize=9)
+            ax.set_ylabel("P(x)", fontsize=9)
+            ax.legend(fontsize=8)
+            ax.grid(True, alpha=0.3, linestyle="--")
+            fig.tight_layout()
+
+            canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill="both", expand=True)
+            graph_frame.figure = fig
+            plt.close(fig)
+
         elif current_sel.get() == "Moindres carrés":
             inputs = get_inputs()
             if mc_mode.get() == "discret":
@@ -877,7 +942,7 @@ def show(app, navigate):
                 )
 
             else:  # continu
-                lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, graph_frame, format_matrix )
+                lancer_mc_continu(inputs, lbl_poly, lbl_cout, lbl_matM, graph_frame, format_matrix)
 
         elif current_sel.get() == "Descente de gradient":
             f_str, x0_str, alpha_str, tol_str = get_input_gd()
@@ -899,7 +964,42 @@ def show(app, navigate):
             #afficher les resultats
             lab_min.configure(text=str(x))
             lbl_err_grad.configure(text=str(erreur))
-    
+
+    # on_voir_detail — Newton uniquement
+    def on_voir_detail():
+        if not _last["diff"]:
+            messagebox.showinfo("Aucun calcul", "Lancez d'abord un calcul Newton.")
+            return
+
+        win2 = tk.Toplevel(app)
+        win2.title("Détail — Newton")
+        win2.geometry("640x440")
+        win2.configure(bg=WHITE)
+
+        customtkinter.CTkLabel(win2,
+            text="Tableau des différences divisées",
+            font=customtkinter.CTkFont(size=14, weight="bold"),
+            text_color=DARK).pack(pady=(14, 6))
+
+        txt = tk.Text(win2, font=("Courier", 10), bg=LIGHT_BG,
+                      wrap="none", padx=10, pady=10)
+        txt.pack(fill="both", expand=True, padx=14, pady=(0, 6))
+
+        # en-tête
+        n = len(_last["xs"])
+        header = "i  |  " + "  ".join(f"  d^{j}  " for j in range(n))
+        txt.insert("end", header + "\n" + "─" * len(header) + "\n")
+
+        for i, row in enumerate(_last["diff"]):
+            vals = "  ".join(f"{v:8.4f}" for v in row)
+            txt.insert("end", f"{i}  |  {vals}\n")
+
+        txt.insert("end", "\n── Coefficients de Newton ──\n")
+        for j, a in enumerate(_last["coeffs_dd"]):
+            txt.insert("end", f"  a_{j} = {a:.6g}\n")
+
+        txt.insert("end", f"\n{_last['poly_str']}\n")
+        txt.configure(state="disabled")
 
     #calcule
     btn_calc = customtkinter.CTkButton(right_col, 
@@ -913,7 +1013,6 @@ def show(app, navigate):
                                     corner_radius=10,
                                     command=on_calculer
     )
-        
     btn_calc.pack(padx=16, pady=(10, 14))
 
     f= customtkinter.CTkFrame(right_col, 
@@ -955,8 +1054,8 @@ def show(app, navigate):
                                         border_width=1, 
                                         border_color=BORDER,
                                         font=customtkinter.CTkFont(size=13), 
-                                        corner_radius=8
-        # command=on_voir_detail a faire
+                                        corner_radius=8,
+                                        command=on_voir_detail
     )
     btn_detail.pack(pady=(0, 8))
 
@@ -984,14 +1083,13 @@ def show(app, navigate):
         elif name == "Moindres carrés":
             mc_frame.pack(anchor="w", padx=16, pady=(0, 8))
             mode_MC()
-            
 
         elif name == "Descente de gradient":
             grad_frame.pack(anchor="w")
             pnt_fram.pack_forget()
             vis_outer.pack_forget()
             param_title.pack_forget()
-
+            mc_func_frame.pack_forget()
 
     def get_inputs():
         return {
