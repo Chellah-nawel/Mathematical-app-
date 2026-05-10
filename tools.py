@@ -4,18 +4,15 @@ import sympy as sp
 x = sp.symbols("x")  
 
 def negatif_signe(f, a, b, n=1000):
-    pts = np.linspace(a, b, n)
-    
-    for i in range(len(pts) - 1):
-        fa, fb = f(pts[i]), f(pts[i+1])
-        if np.isfinite(fa) and np.isfinite(fb) and fa * fb < 0:
-            return True
-    
-    return False
+    if f(a)*f(b)<0:
+        return True
+    else:
+        print("- pas de racine dans cette interval")
+        return False
 
 def continu(f,a,b):
     if a <= 0 <= b:
-        #tester spécifiquement le point problématique en cas de 1/x
+        #tester le point problm (en cas de div par 0)
         try:
             f(0)
         except:
