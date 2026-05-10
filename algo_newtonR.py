@@ -17,7 +17,7 @@ def verifie_converge(f, a, b, df, ddf):
     cond2 = np.all(df(x) != 0)                          #assurer la monotonie de f dans [a,b]
     cond3 = (np.all(ddf(x) > 0) or np.all(ddf(x) < 0))  # Condition sur la dérivée seconde qu'elle garde le même signe dans [a,b]
 
-    #c = x[np.argmin(np.abs(df(x)))]
+    #c = x[np.argmin(np.abs(df(x)))] another way to get c
     c = min([abs(df(xi)) for xi in x])      #c = min(f'(a), f'(b))
     cond4 = (abs(f(c) / df(c)) <= (b - a))  #|f(c)/f'(c)|< b-a 
 
@@ -44,12 +44,12 @@ def newton_r(f,a,b,x0,ep):
     x= x0
     
     f_sym = to_sympy(f)
-    df_sym= deriver(f_sym)          #f'(x) en sp
+    df_sym= deriver(f_sym)                #f'(x) en sp
     ddf_sym= deriver(df_sym)              #f''(x) en sp
 
-    df= sympyto_numpy(df_sym)    #f' est en np
-    ddf=sympyto_numpy(ddf_sym)  #f'' est en np
-    f=to_numpy(f)               # en np pour verifier cv
+    df= sympyto_numpy(df_sym)       #f' est en np
+    ddf=sympyto_numpy(ddf_sym)      #f'' est en np
+    f=to_numpy(f)                   # en np pour verifier cv
 
     #majoree l erreur
     m= np.inf               #+ infini
@@ -58,7 +58,7 @@ def newton_r(f,a,b,x0,ep):
     df_vals = df(x_range)    
     ddf_vals = ddf(x_range)
 
-    m=np.min(np.abs(df_vals) )     #born inf f'
+    m=np.min(np.abs(df_vals) )      #born inf f'
     M=np.max(np.abs(ddf_vals))      #born sup f''
 
     row=[]
@@ -81,7 +81,7 @@ def newton_r(f,a,b,x0,ep):
             if error < ep:                      #cond d arret erreur estimer < epsilon
                 break
 
-    else: return  None,0                        #La suite ne converge pas, on ne peut pas appliquer l'algo de Newton
+    else: return  None,0                        #la suite ne cv pas cant apply newton
 
     draw_table(row)
     graphe(f,a,b,iteration, x0,xnext)
