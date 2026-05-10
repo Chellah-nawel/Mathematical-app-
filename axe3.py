@@ -1074,15 +1074,25 @@ def show(app, navigate):
         grad_frame.pack_forget()
         interp_res_frame.pack_forget()
 
-        if name in ("Lagrange", "Newton"):
+        if name == "Lagrange":
             deg_display_frame.pack(anchor="w", padx=16, pady=(0, 8))
             switch_row.pack(anchor="w", padx=16, pady=(0, 12))
             interp_res_frame.pack(anchor="w", padx=16, pady=(0, 8))
+            btn_detail.pack_forget()
             pnt_fram.pack(side="left", fill="y", padx=(0, 0))
-
+            vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
+        elif name == "Newton":
+                deg_display_frame.pack(anchor="w", padx=16, pady=(0, 8))
+                switch_row.pack(anchor="w", padx=16, pady=(0, 12))
+                interp_res_frame.pack(anchor="w", padx=16, pady=(0, 8))
+                btn_detail.pack(pady=(0, 8))
+                pnt_fram.pack(side="left", fill="y", padx=(0, 0))
+                vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
         elif name == "Moindres carrés":
             mc_frame.pack(anchor="w", padx=16, pady=(0, 8))
             mode_MC()
+            vis_outer.pack(side="bottom", fill="x", padx=14, pady=(0, 14))
+            
 
         elif name == "Descente de gradient":
             grad_frame.pack(anchor="w")

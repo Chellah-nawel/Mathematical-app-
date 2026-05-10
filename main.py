@@ -5,7 +5,7 @@ import axe2
 import axe3
 import guide
 
-# ─── fenetre principale unique ─────────────────────────────────────────────────
+# fenetre principale unique
 app = customtkinter.CTk()
 app.geometry("1050x680")
 app.title("Numerical Lab")
