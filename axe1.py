@@ -296,7 +296,7 @@ def show(app, navigate):
         btn.pack(padx=14, pady=3)
         op_btns[op] = btn
 
-    # ── affichage image PNG dans visualisation ────────────────────
+    # ── affichage image png  ────────────────────
     def show_png_in_canvas(path):
         for w in canvas_frame.winfo_children():
             w.destroy()
@@ -307,7 +307,7 @@ def show(app, navigate):
                                    text_color=GREY).pack(expand=True)
             return
 
-        # Conteneur scrollable
+        # conteneur scrollable
         scroll = customtkinter.CTkScrollableFrame(canvas_frame,fg_color="transparent")
         scroll.pack(fill="both", expand=True)
 
@@ -320,7 +320,7 @@ def show(app, navigate):
         photo = ImageTk.PhotoImage(img)
 
         lbl_img = tk.Label(scroll, image=photo, bg=WHITE)
-        lbl_img.image = photo   # garder référence
+        lbl_img.image = photo   # garder ref
         lbl_img.pack(padx=8, pady=8)
 
     # ── on_calculer ───────────────────────────────────────────────
@@ -377,7 +377,7 @@ def show(app, navigate):
         try:
             #================= DICHOTOMIE =================
             if sel == "Dichotomie":
-                # dichotomie retourne (racine, iterations)
+                # dichotomie return r, i
                 res = dichotomie(f_expr, av, bv, ep)
 
                 if res is None or res[0] is None:
@@ -398,7 +398,7 @@ def show(app, navigate):
 
                 x0v = params["x0"]
 
-                # Vérifications
+                # verifications additionel in case
                 f_np = to_numpy(f_expr)
 
                 if not continu(f_np, av, bv):
@@ -410,7 +410,7 @@ def show(app, navigate):
                     app.after(0, lambda: _algo_error(
                         "Newton : x0 doit être dans [a,b]."))
                     return
-                # newton retourne (racine, iterations)
+                # newton return r,i
                 res = newton_r(f_expr, av, bv, x0v, ep)
 
                 if res is None or res[0] is None:
@@ -444,7 +444,7 @@ def show(app, navigate):
                         "Point fixe : x0 doit être dans [a,b]."))
                     return
 
-                # POINT FIXE retourne (racine, iterations)
+                # pt fixe return r,i
                 res = point_fixe(f_expr, av, bv, phi_str, x0v, ep)
 
                 if res is None or res[0] is None:
@@ -454,9 +454,7 @@ def show(app, navigate):
 
                 racine, nb_iter = res
 
-                app.after(
-                    0,
-                    lambda r=racine, n=nb_iter:
+                app.after(0,lambda r=racine, n=nb_iter:
                     _update_result(f_expr, av, bv, r, n, sel)
                 )
 
@@ -481,7 +479,7 @@ def show(app, navigate):
             lbl_frac.configure(text="—")
         lbl_saved.configure(text="✓ Table et graphe enregistrés automatiquement")
 
-        # Chemins PNG selon algo
+        #chemins image
         graph_map = {
             "Dichotomie" : "resultat/dichotomie_graphe.png",
             "Newton"     : "resultat/newtonR_graphe.png",
@@ -496,7 +494,7 @@ def show(app, navigate):
         last_graph_path[0] = graph_map.get(sel)
         last_table_path[0] = table_map.get(sel)
 
-        # Afficher le graphe PNG généré par l'algo
+        # afficher graphe par l algo
         show_png_in_canvas(last_graph_path[0])
         btn_calc.configure(state="normal", text="▶   Calculer")
 
@@ -523,7 +521,7 @@ def show(app, navigate):
         elif mode == "op":
             try:
                 if sel == "Dérivée":
-                    df_sym = deriver(to_sympy(f_expr))
+                    df_sym = deriver(to_sympy(f_expr))        #call deriver()
                     lbl_res_op.configure(
                         text=f"f'(x) = {df_sym}",
                         font=customtkinter.CTkFont(size=13))
@@ -535,7 +533,7 @@ def show(app, navigate):
                         show_err("Entrez a et b")
                         return
                     f_np = to_numpy(f_expr)
-                    ok = continu(f_np, av, bv)
+                    ok = continu(f_np, av, bv)        #call continu()
                     lbl_res_op.configure(
                         text="✓ f(x) est continue sur [a, b]" if ok
                              else "✗ f(x) est discontinue sur [a, b]\n(division par zéro ou valeur infinie détectée)",
@@ -548,7 +546,7 @@ def show(app, navigate):
                     if av is None:
                         show_err("Entrez a et b")
                         return
-                    # Vérifie continuité d'abord
+                    # verify continu
                     f_np = to_numpy(f_expr)
                     if not continu(f_np, av, bv):
                         lbl_res_op.configure(
@@ -556,17 +554,16 @@ def show(app, navigate):
                             text_color=RED,
                             font=customtkinter.CTkFont(size=12))
                         return
-                    df_sym = deriver(to_sympy(f_expr))
+                    df_sym = deriver(to_sympy(f_expr))        #calc df deriver()
                     df_np  = sympyto_numpy(df_sym)
-                    xs     = np.linspace(av, bv, 9)
+                    xs = np.linspace(av, bv, 9)
                     lines  = [f"{'x':>8}   {'f(x)':>12}   {'f\'(x)':>12}   {'variation'}"]
-                    lines += ["-"*52]
+                    lines += ["-"*52]        #draw table vari
                     for xi in xs:
                         fval  = f_np(xi)
                         dfval = df_np(xi)
                         arrow = "↗" if dfval > 0 else ("↘" if dfval < 0 else "→")
-                        lines.append(
-                            f"{xi:>8.4f}   {fval:>12.5f}   {dfval:>12.5f}   {arrow}")
+                        lines.append(f"{xi:>8.4f}   {fval:>12.5f}   {dfval:>12.5f}   {arrow}")
                     lbl_res_op.configure(
                         text="\n".join(lines),
                         font=customtkinter.CTkFont(size=11, family="Courier"),
@@ -579,13 +576,13 @@ def show(app, navigate):
                         show_err("Entrez a et b")
                         return
                     f_np = to_numpy(f_expr)
-                    if not continu(f_np, av, bv):
+                    if not continu(f_np, av, bv):        #call continu()
                         lbl_res_op.configure(
                             text="✗ Impossible : f(x) discontinue sur [a, b]",
                             text_color=RED,
                             font=customtkinter.CTkFont(size=12))
                         return
-                    xs    = np.linspace(av, bv, 9)
+                    xs  = np.linspace(av, bv, 9)          #try pt for le signe
                     lines = [f"{'x':>8}   {'f(x)':>12}   {'signe'}"]
                     lines += ["-"*36]
                     for xi in xs:
@@ -603,13 +600,13 @@ def show(app, navigate):
                     text_color=RED,
                     font=customtkinter.CTkFont(size=12))
 
-    # ── comparer les 3 méthodes ───────────────────────────────────
+    # ── comparer les 3 methodes ───────────────────────────────────
     def on_comparer():
 
         f_expr = inputf.get().strip()
         a_str  = a_entry.get().strip()
         b_str  = b_entry.get().strip()
-        ep     = tol_value[0]
+        ep = tol_value[0]
         x0_str = input_x0.get().strip()
 
         if not f_expr or not a_str or not b_str:
@@ -685,9 +682,8 @@ def show(app, navigate):
         }
         best = min(valid_iters, key=valid_iters.get) if valid_iters else None
 
-        # ================= AFFICHAGE DANS L'INTERFACE PRINCIPALE =================
-        
-        # Si une méthode a trouvé une racine valide l'afficher dans les champs
+        # ================= AFFICHAGE =================
+        #si une methode a trouve une racine valide l'afficher dans les champs
         best_racine = None
         best_nb_iter = None
         best_method = None
@@ -700,24 +696,24 @@ def show(app, navigate):
                     best_method = meth
         
         if best_racine is not None:
-            # Afficher la meilleure racine 
+            #afficher la meilleure racine 
             lbl_racine.configure(text=f"{best_racine:.7f}",
                                 font=customtkinter.CTkFont(size=18, weight="bold"))
             lbl_iters.configure(text=str(best_nb_iter) if best_nb_iter is not None else "—")
             
-            # Calculer f(racine)
+            #calc f(racine)
             try:
                 f_np = to_numpy(f_expr)
                 lbl_frac.configure(text=f"{float(f_np(best_racine)):.2e}")
             except:
                 lbl_frac.configure(text="—")
             
-            # Message de confirmation
+            #message confirmation
             lbl_saved.configure(text=f"✓ Comparaison terminée - Les graphes et tables sont enregistrer")
             
-            # Générer et afficher le graphe pour la meilleure méthode
+            #get et affiche le graphe pour la meilleure methode
             try:
-                # Choisir le graphe selon la meilleure méthode
+                #choisir le graphe de la meilleure méthode
                 graph_path = {
                     "Dichotomie": "resultat/dichotomie_graphe.png",
                     "Newton": "resultat/newtonR_graphe.png", 
@@ -735,7 +731,7 @@ def show(app, navigate):
             except:
                 pass
                 
-            # Afficher un les resultat
+            #afficher un les resultat compar
             summary_text = f"📊 Comparaison des 3 méthodes:\n"
             for meth, val in results.items():
                 if isinstance(val, float):
@@ -747,17 +743,16 @@ def show(app, navigate):
             
             summary_text += f"🏆 Meilleure méthode: {best_method} ({best_nb_iter} itérations)"
             
-            # Mettre à jour le label de recommandation/tip
+            #mettre a jour label de recommandation
             lbl_tip.configure(text=summary_text, wraplength=350)
             
         else:
             show_err("Aucune méthode n'a convergé vers une racine")
 
-    # ── voir itérations : fenêtre popup avec tableau ──────────────
     def on_voir_iter():
         sel = current_sel.get()
 
-        # Afficher le PNG de la table dans la visualisation
+        #afficher le PNG de la table dans visualisation
         if last_table_path[0] and os.path.exists(last_table_path[0]):
             show_png_in_canvas(last_table_path[0])
             return
@@ -824,7 +819,6 @@ def show(app, navigate):
     def _update_reco(name):
         lbl_tip.configure(text=RECO.get(name, "Sélectionnez un algorithme."))
 
-    # ── boutons voir iter + comparer ──────────────────────────────
     btn_row = customtkinter.CTkFrame(result, fg_color="transparent")
     btn_row.pack(fill="x", padx=16, pady=(4,8))
 
@@ -842,7 +836,7 @@ def show(app, navigate):
                                        corner_radius=8,command=on_comparer)
     btn_meth.pack(side="right")
 
-    # ── visualisation (avec scroll) ───────────────────────────────
+    # ── visualisation ───────────────────────────────
     visualisation = customtkinter.CTkFrame(app, bg_color=WHITE, fg_color=WHITE,corner_radius=12)
     visualisation.pack(fill="both", expand=True, padx=14, pady=(0,14))
 
@@ -852,7 +846,7 @@ def show(app, navigate):
                            font=customtkinter.CTkFont(size=13, weight="bold"),
                            text_color=DARK).pack(side="left")
 
-    # Boutons graphe / table dans visualisation
+    #boutons graphe / table dans visualisation
     vis_btn_row = customtkinter.CTkFrame(vis_header, fg_color="transparent")
     vis_btn_row.pack(side="right")
 
@@ -882,8 +876,7 @@ def show(app, navigate):
     customtkinter.CTkLabel(canvas_frame,text="Le graphe apparaîtra ici après le calcul.",
                            font=customtkinter.CTkFont(size=12),
                            text_color=GREY).pack(expand=True)
-
-    # ── résultats mode op ─────────────────────────────────────────
+    # ── resultats mode op ─────────────────────────────────────────
     resultat = customtkinter.CTkScrollableFrame(
         body,fg_color=WHITE,bg_color=WHITE,corner_radius=12)
     customtkinter.CTkLabel(resultat, text="Résultats",font=customtkinter.CTkFont(size=14, weight="bold"),
